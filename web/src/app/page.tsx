@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Download, Zap, Moon, Monitor, Github, Mail } from "lucide-react";
-import DemoPlayer from "@/components/DemoPlayer";
+import DemoPlayer from "../components/DemoPlayer";
 
 export default function Home() {
   return (

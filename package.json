@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "dev-build": "tauri build --debug",
+    "quick-dmg": "npm run build && tauri build --debug --bundles dmg"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.9.0",
