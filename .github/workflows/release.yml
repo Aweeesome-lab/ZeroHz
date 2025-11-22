@@ -12,18 +12,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest, windows-latest]
+        platform: [macos-latest]
     runs-on: ${{ matrix.platform }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-22.04'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libappindicator3-dev librsvg2-dev patchelf
 
       - name: Setup node
         uses: actions/setup-node@v4
@@ -32,6 +26,8 @@ jobs:
 
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-apple-darwin, aarch64-apple-darwin
 
       - name: Install frontend dependencies
         run: npm install
@@ -48,18 +44,15 @@ jobs:
           releaseBody: "See the assets to download this version and install."
           releaseDraft: true
           prerelease: false
+          args: --target universal-apple-darwin
 
       - name: Upload assets to Vercel Blob
-        if: matrix.platform == 'macos-latest' || matrix.platform == 'windows-latest'
+        if: matrix.platform == 'macos-latest'
         env:
           ZEROHZ_READ_WRITE_TOKEN: ${{ secrets.ZEROHZ_READ_WRITE_TOKEN }}
         run: |
           # Find the built asset
-          if [ "${{ matrix.platform }}" == "macos-latest" ]; then
-            ASSET_PATH=$(find src-tauri/target/release/bundle/dmg -name "*.dmg" | head -n 1)
-          elif [ "${{ matrix.platform }}" == "windows-latest" ]; then
-            ASSET_PATH=$(find src-tauri/target/release/bundle/nsis -name "*.exe" | head -n 1)
-          fi
+          ASSET_PATH=$(find src-tauri/target/universal-apple-darwin/release/bundle/dmg -name "*.dmg" | head -n 1)
 
           if [ -n "$ASSET_PATH" ]; then
             echo "Found asset: $ASSET_PATH"

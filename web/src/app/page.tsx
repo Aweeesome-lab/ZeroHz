@@ -63,13 +63,13 @@ export default function Home() {
               <Download size={20} />
               Download for Mac
             </Link>
-            <Link
+            {/* <Link
               href="/api/download?platform=win"
               className="px-8 py-4 bg-gray-100 text-black rounded-full font-semibold hover:bg-gray-200 transition-all flex items-center gap-2 border border-black/5"
             >
               <Monitor size={20} />
               Download for Windows
-            </Link>
+            </Link> */}
           </div>
 
           {/* Interactive Demo */}
@@ -119,7 +119,7 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
-              version="v0.1.4"
+              version="v0.1.5"
               date="November 22, 2025"
               changes={[
                 "Hotfix: Resolved build dependency issues",
@@ -128,7 +128,7 @@ export default function Home() {
               ]}
             />
             <ReleaseItem
-              version="v0.1.4"
+              version="v0.1.5"
               date="November 22, 2025"
               changes={[
                 "Initial release of ZeroHz",
