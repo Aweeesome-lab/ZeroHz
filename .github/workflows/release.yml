@@ -52,7 +52,7 @@ jobs:
       - name: Upload assets to Vercel Blob
         if: matrix.platform == 'macos-latest' || matrix.platform == 'windows-latest'
         env:
-          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+          ZEROHZ_READ_WRITE_TOKEN: ${{ secrets.ZEROHZ_READ_WRITE_TOKEN }}
         run: |
           # Find the built asset
           if [ "${{ matrix.platform }}" == "macos-latest" ]; then
