@@ -82,6 +82,10 @@ pub fn run() {
         .checked(is_enabled)
         .build(app)?;
       
+      let show_window_item = CheckMenuItemBuilder::new("Show Window")
+        .checked(true)
+        .build(app)?;
+
       let separator3 = PredefinedMenuItem::separator(app)?;
       
       let quit_item = MenuItemBuilder::new("Quit")
@@ -90,11 +94,12 @@ pub fn run() {
       // Store menu item IDs for use in the closure
       let check_update_id = check_update_item.id().clone();
       let autostart_id = autostart_item.id().clone();
+      let show_window_id = show_window_item.id().clone();
       let quit_id = quit_item.id().clone();
 
       let menu = Menu::with_items(
         app,
-        &[&version_item, &separator1, &check_update_item, &separator2, &autostart_item, &separator3, &quit_item],
+        &[&version_item, &separator1, &check_update_item, &separator2, &autostart_item, &show_window_item, &separator3, &quit_item],
       )?;
 
       // Load and decode the tray icon PNG
@@ -175,20 +180,37 @@ pub fn run() {
             }
           } else if event.id == quit_id {
             app.exit(0);
+          } else if event.id == show_window_id {
+            if let Some(window) = app.get_webview_window("main") {
+              if window.is_visible().unwrap_or(false) {
+                let _ = window.hide();
+              } else {
+                let _ = window.show();
+                let _ = window.set_focus();
+              }
+            }
           }
         })
-        .on_tray_icon_event(|tray, event| match event {
+        .on_tray_icon_event(move |tray, event| match event {
           TrayIconEvent::Click {
             button: MouseButton::Left,
             ..
           } => {
             let app = tray.app_handle();
             if let Some(window) = app.get_webview_window("main") {
-              if window.is_visible().unwrap_or(false) {
+              let is_visible = window.is_visible().unwrap_or(false);
+              if is_visible {
                  let _ = window.hide();
               } else {
                  let _ = window.show();
                  let _ = window.set_focus();
+              }
+              
+              // Update menu item state
+              if let Some(item) = app.menu().and_then(|menu| menu.get(&show_window_id)) {
+                if let Some(check_item) = item.as_check_menuitem() {
+                  let _ = check_item.set_checked(!is_visible);
+                }
               }
             }
           }
