@@ -119,7 +119,7 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
-              version="v0.1.2"
+              version="v0.1.4"
               date="November 22, 2025"
               changes={[
                 "Hotfix: Resolved build dependency issues",
@@ -128,7 +128,7 @@ export default function Home() {
               ]}
             />
             <ReleaseItem
-              version="v0.1.0"
+              version="v0.1.4"
               date="November 22, 2025"
               changes={[
                 "Initial release of ZeroHz",
@@ -155,11 +155,11 @@ export default function Home() {
           </p>
           <div className="flex justify-center gap-4">
             <Link
-              href="mailto:support@zerohz.app"
+              href="https://www.threads.net/@nerd_makr"
               className="flex items-center gap-2 px-6 py-3 bg-white border border-black/10 rounded-lg hover:bg-gray-50 transition-colors font-medium"
             >
               <Mail size={18} />
-              Contact Support
+              Contact via Threads
             </Link>
           </div>
         </div>
