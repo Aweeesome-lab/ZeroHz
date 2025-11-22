@@ -10,6 +10,8 @@ import {
   VolumeX,
   Maximize2,
   Minimize2,
+  Play,
+  Pause,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +41,7 @@ export default function DemoPlayer() {
   const [isCompact, setIsCompact] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false); // Default to false for web demo
 
   // Audio refs
   const audioRefs = useRef<Record<SoundType, HTMLAudioElement | null>>({
@@ -78,7 +81,8 @@ export default function DemoPlayer() {
       const shouldPlay = activeSounds.has(sound.id);
 
       if (shouldPlay) {
-        if (audio.paused) {
+        // Only play if global isPlaying is true
+        if (isPlaying && audio.paused) {
           audio.play().catch(() => {
             // Auto-play policy might block this without user interaction
             console.log("Playback prevented by browser policy");
@@ -91,7 +95,7 @@ export default function DemoPlayer() {
         }
       }
     });
-  }, [activeSounds]);
+  }, [activeSounds, isPlaying]);
 
   // Handle volume/mute changes
   useEffect(() => {
@@ -107,18 +111,14 @@ export default function DemoPlayer() {
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    if (activeSounds.size > 0) {
+    if (activeSounds.size > 0 && isPlaying) {
       interval = setInterval(() => {
         setElapsedTime((prev) => prev + 1);
       }, 1000);
-    } else {
-      // Use a timeout to avoid synchronous state update warning
-      const timeoutId = setTimeout(() => setElapsedTime(0), 0);
-      return () => clearTimeout(timeoutId);
     }
 
     return () => clearInterval(interval);
-  }, [activeSounds]);
+  }, [activeSounds, isPlaying]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -138,10 +138,34 @@ export default function DemoPlayer() {
       }
       return newSet;
     });
+
+    // If we are adding the first sound, ensure we are playing
+    if (activeSounds.size === 0 && !isPlaying) {
+      setIsPlaying(true);
+    }
   };
 
   const handleVolumeChange = (id: SoundType, value: number) => {
     setVolumes((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const togglePlayPause = () => {
+    const newIsPlaying = !isPlaying;
+    setIsPlaying(newIsPlaying);
+
+    // Manually sync audio elements
+    SOUNDS.forEach((sound) => {
+      const audio = audioRefs.current[sound.id];
+      if (!audio) return;
+
+      if (activeSounds.has(sound.id)) {
+        if (newIsPlaying) {
+          audio.play().catch(console.error);
+        } else {
+          audio.pause();
+        }
+      }
+    });
   };
 
   return (
@@ -155,6 +179,14 @@ export default function DemoPlayer() {
         {isCompact ? (
           // Compact Mode UI
           <>
+            <button
+              onClick={togglePlayPause}
+              className="text-white/70 hover:text-white transition-colors p-0.5"
+              title={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? <Pause size={12} /> : <Play size={12} />}
+            </button>
+
             <div className="font-mono text-xs text-white/80 font-medium min-w-[36px] text-center select-none">
               {formatTime(elapsedTime)}
             </div>
@@ -240,6 +272,19 @@ export default function DemoPlayer() {
               title="Mute All"
             >
               {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            </button>
+
+            <button
+              onClick={togglePlayPause}
+              className={cn(
+                "p-2.5 rounded-full transition-all duration-300 ease-in-out border-0",
+                !isPlaying
+                  ? "bg-amber-500/80 text-white"
+                  : "bg-transparent text-white/70 hover:bg-white/10 hover:text-white"
+              )}
+              title={isPlaying ? "Pause All" : "Resume All"}
+            >
+              {isPlaying ? <Pause size={20} /> : <Play size={20} />}
             </button>
           </>
         )}
