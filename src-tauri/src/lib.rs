@@ -191,31 +191,6 @@ pub fn run() {
             }
           }
         })
-        .on_tray_icon_event(move |tray, event| match event {
-          TrayIconEvent::Click {
-            button: MouseButton::Left,
-            ..
-          } => {
-            let app = tray.app_handle();
-            if let Some(window) = app.get_webview_window("main") {
-              let is_visible = window.is_visible().unwrap_or(false);
-              if is_visible {
-                 let _ = window.hide();
-              } else {
-                 let _ = window.show();
-                 let _ = window.set_focus();
-              }
-              
-              // Update menu item state
-              if let Some(item) = app.menu().and_then(|menu| menu.get(&show_window_id)) {
-                if let Some(check_item) = item.as_check_menuitem() {
-                  let _ = check_item.set_checked(!is_visible);
-                }
-              }
-            }
-          }
-          _ => {}
-        })
         .build(app)?;
 
       if cfg!(debug_assertions) {
