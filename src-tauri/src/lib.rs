@@ -54,8 +54,17 @@ pub fn run() {
       let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
       let menu = Menu::with_items(app, &[&quit_i])?;
 
+      // Load and decode the tray icon PNG
+      let tray_icon_bytes = include_bytes!("../icons/tray-icon-template.png");
+      let tray_img = image::load_from_memory(tray_icon_bytes)
+        .map_err(|e| tauri::Error::AssetNotFound(format!("Failed to load tray icon: {}", e)))?;
+      let tray_rgba = tray_img.to_rgba8();
+      let (width, height) = tray_rgba.dimensions();
+      let tray_icon_image = tauri::image::Image::new(tray_rgba.as_raw(), width, height);
+
       let _tray = TrayIconBuilder::with_id("tray")
-        .icon(app.default_window_icon().unwrap().clone())
+        .icon(tray_icon_image)
+        .icon_as_template(true)  // macOS template icon for theme adaptation
         .menu(&menu)
         .on_menu_event(|app, event| {
           match event.id.as_ref() {

@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Download, Zap, Moon, Monitor, Github, Mail } from "lucide-react";
+import { Download, Moon, Monitor, Github, Mail, Zap } from "lucide-react";
 import DemoPlayer from "../components/DemoPlayer";
+import Image from "next/image";
 
 export default function Home() {
   return (
@@ -8,11 +9,16 @@ export default function Home() {
       {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 border-b border-black/5 bg-white/80 backdrop-blur-xl">
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-xl tracking-tighter">
-            <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white">
-              <Zap size={18} fill="currentColor" />
+          <div className="flex items-center gap-2 font-bold text-xl tracking-tight font-serif">
+            <div className="w-8 h-8 relative">
+              <Image
+                src="/logo.png"
+                alt="ZeroHz"
+                fill
+                className="object-contain"
+              />
             </div>
-            ZeroHZ
+            ZeroHz
           </div>
           <div className="flex items-center gap-6 text-sm font-medium text-black/60">
             <Link
@@ -56,21 +62,21 @@ export default function Home() {
           </h1>
 
           <p className="text-lg md:text-xl text-black/60 max-w-2xl mx-auto leading-relaxed">
-            ZeroHZ is a minimalist white noise player for macOS and Windows.
+            ZeroHz is a minimalist white noise player for macOS and Windows.
             Designed to live in your menu bar, it helps you stay in the zone
             without getting in your way.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
             <Link
-              href="https://github.com/username/zerohz/releases/latest/download/ZeroHZ.dmg"
+              href="https://github.com/username/zerohz/releases/latest/download/ZeroHz.dmg"
               className="group relative px-8 py-4 bg-black text-white rounded-full font-semibold hover:bg-black/80 transition-all flex items-center gap-2 shadow-lg shadow-black/20"
             >
               <Download size={20} />
               Download for Mac
             </Link>
             <Link
-              href="https://github.com/username/zerohz/releases/latest/download/ZeroHZ-setup.exe"
+              href="https://github.com/username/zerohz/releases/latest/download/ZeroHz-setup.exe"
               className="px-8 py-4 bg-gray-100 text-black rounded-full font-semibold hover:bg-gray-200 transition-all flex items-center gap-2 border border-black/5"
             >
               <Monitor size={20} />
@@ -128,7 +134,7 @@ export default function Home() {
               version="v0.1.0"
               date="November 22, 2025"
               changes={[
-                "Initial release of ZeroHZ",
+                "Initial release of ZeroHz",
                 "Support for macOS (DMG) and Windows (EXE)",
                 "4 high-quality nature sounds: Wind, Rain, Fire, Waves",
                 "Minimalist floating bar interface",
@@ -172,10 +178,18 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-12 border-t border-black/5 text-center text-black/40 text-sm bg-white">
         <div className="container mx-auto px-6">
-          <div className="flex items-center justify-center gap-2 mb-4 font-bold text-black/80">
-            <Zap size={16} fill="currentColor" /> ZeroHZ
+          <div className="flex items-center justify-center gap-2 mb-4 font-bold text-black/80 font-serif">
+            <div className="w-5 h-5 relative">
+              <Image
+                src="/logo.png"
+                alt="ZeroHz"
+                fill
+                className="object-contain"
+              />
+            </div>
+            ZeroHz
           </div>
-          <p>&copy; {new Date().getFullYear()} ZeroHZ. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} ZeroHz. All rights reserved.</p>
           <p className="mt-2">
             Designed for focus. Built with Tauri & Next.js.
           </p>

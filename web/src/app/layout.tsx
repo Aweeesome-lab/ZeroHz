@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ZeroHZ - Focus at the speed of sound",
-  description: "Minimalist white noise player for macOS and Windows.",
+  title: "ZeroHz - Minimalist White Noise for Deep Focus",
+  description:
+    "A minimalist white noise player for macOS and Windows. Stay focused with ambient sounds.",
 };
 
 export default function RootLayout({
