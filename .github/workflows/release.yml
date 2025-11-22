@@ -48,3 +48,27 @@ jobs:
           releaseBody: "See the assets to download this version and install."
           releaseDraft: true
           prerelease: false
+
+      - name: Upload assets to Vercel Blob
+        if: matrix.platform == 'macos-latest' || matrix.platform == 'windows-latest'
+        env:
+          BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+        run: |
+          # Find the built asset
+          if [ "${{ matrix.platform }}" == "macos-latest" ]; then
+            ASSET_PATH=$(find src-tauri/target/release/bundle/dmg -name "*.dmg" | head -n 1)
+          elif [ "${{ matrix.platform }}" == "windows-latest" ]; then
+            ASSET_PATH=$(find src-tauri/target/release/bundle/nsis -name "*.exe" | head -n 1)
+          fi
+
+          if [ -n "$ASSET_PATH" ]; then
+            echo "Found asset: $ASSET_PATH"
+            # Install dependencies in web folder if not already (it was installed in previous step but let's be safe or reuse)
+            # We need to run the script using node from web directory context or just require the module
+            # Simplest way: use the installed @vercel/blob in web/node_modules
+            
+            node web/scripts/upload-to-blob.mjs "$ASSET_PATH"
+          else
+            echo "No asset found to upload"
+            exit 1
+          fi
