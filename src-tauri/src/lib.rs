@@ -1,6 +1,6 @@
 use tauri::{
   menu::{Menu, MenuItemBuilder, PredefinedMenuItem, CheckMenuItemBuilder},
-  tray::{MouseButton, TrayIconBuilder, TrayIconEvent},
+  tray::TrayIconBuilder,
   Manager, PhysicalPosition,
 };
 use tauri_plugin_autostart::ManagerExt;
