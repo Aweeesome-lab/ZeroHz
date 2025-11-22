@@ -1,12 +1,17 @@
 use tauri::{
-  menu::{Menu, MenuItem},
+  menu::{Menu, MenuItemBuilder, PredefinedMenuItem, CheckMenuItemBuilder},
   tray::{MouseButton, TrayIconBuilder, TrayIconEvent},
   Manager, PhysicalPosition,
 };
+use tauri_plugin_autostart::ManagerExt;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
+    .plugin(tauri_plugin_autostart::init(
+      tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+      None, // No additional arguments
+    ))
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();
 
@@ -51,8 +56,38 @@ pub fn run() {
         }
       }
 
-      let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-      let menu = Menu::with_items(app, &[&quit_i])?;
+      // Get app version from Cargo.toml
+      let version = env!("CARGO_PKG_VERSION");
+      let version_text = format!("Version {}", version);
+
+      // Check current autostart status
+      let autostart_manager = app.autolaunch();
+      let is_enabled = autostart_manager.is_enabled().unwrap_or(false);
+
+      // Build menu items
+      let version_item = MenuItemBuilder::new(&version_text)
+        .enabled(false)
+        .build(app)?;
+      
+      let separator1 = PredefinedMenuItem::separator(app)?;
+      
+      let autostart_item = CheckMenuItemBuilder::new("Start at Login")
+        .checked(is_enabled)
+        .build(app)?;
+      
+      let separator2 = PredefinedMenuItem::separator(app)?;
+      
+      let quit_item = MenuItemBuilder::new("Quit")
+        .build(app)?;
+
+      // Store menu item IDs for use in the closure
+      let autostart_id = autostart_item.id().clone();
+      let quit_id = quit_item.id().clone();
+
+      let menu = Menu::with_items(
+        app,
+        &[&version_item, &separator1, &autostart_item, &separator2, &quit_item],
+      )?;
 
       // Load and decode the tray icon PNG
       let tray_icon_bytes = include_bytes!("../icons/tray-icon-template.png");
@@ -66,12 +101,36 @@ pub fn run() {
         .icon(tray_icon_image)
         .icon_as_template(true)  // macOS template icon for theme adaptation
         .menu(&menu)
-        .on_menu_event(|app, event| {
-          match event.id.as_ref() {
-            "quit" => {
-              app.exit(0);
+        .on_menu_event(move |app, event| {
+          if event.id == autostart_id {
+            let autostart_manager = app.autolaunch();
+            let is_enabled = autostart_manager.is_enabled().unwrap_or(false);
+            
+            if let Some(item) = app.menu().and_then(|menu| menu.get(&autostart_id)) {
+              if let Some(check_item) = item.as_check_menuitem() {
+                if is_enabled {
+                  println!("Disabling autostart...");
+                  match autostart_manager.disable() {
+                    Ok(_) => {
+                      println!("Autostart disabled successfully");
+                      let _ = check_item.set_checked(false);
+                    }
+                    Err(e) => println!("Failed to disable autostart: {:?}", e),
+                  }
+                } else {
+                  println!("Enabling autostart...");
+                  match autostart_manager.enable() {
+                    Ok(_) => {
+                      println!("Autostart enabled successfully");
+                      let _ = check_item.set_checked(true);
+                    }
+                    Err(e) => println!("Failed to enable autostart: {:?}", e),
+                  }
+                }
+              }
             }
-            _ => {}
+          } else if event.id == quit_id {
+            app.exit(0);
           }
         })
         .on_tray_icon_event(|tray, event| match event {
