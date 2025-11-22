@@ -29,11 +29,8 @@ dW50cnVzdGVkIGNvbW1lbnQ6IHJzaWduIGVuY3J5cHRlZCBzZWNyZXQga2V5ClJXUlRZMEl5UW9MVGht
 
 #### `TAURI_KEY_PASSWORD`
 
-현재는 패스워드 없이 키를 생성했으므로 빈 값으로 설정하세요:
-
-```
-(빈 값으로 남겨두기)
-```
+현재는 패스워드 없이 키를 생성했으므로, **이 Secret은 생성하지 않아도 됩니다.**
+(GitHub Actions에서 존재하지 않는 Secret을 참조하면 자동으로 빈 값으로 처리됩니다.)
 
 ---
 
