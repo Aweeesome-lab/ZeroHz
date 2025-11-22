@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     // List blobs from Vercel Blob storage
     const { blobs } = await list({
-      token: process.env.BLOB_READ_WRITE_TOKEN,
+      token: process.env.ZEROHZ_READ_WRITE_TOKEN,
     });
 
     let downloadUrl = "";
