@@ -4,6 +4,7 @@ use tauri::{
   Manager, PhysicalPosition,
 };
 use tauri_plugin_autostart::ManagerExt;
+use tauri_plugin_updater::UpdaterExt;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -12,6 +13,7 @@ pub fn run() {
       tauri_plugin_autostart::MacosLauncher::LaunchAgent,
       None, // No additional arguments
     ))
+    .plugin(tauri_plugin_updater::Builder::new().build())
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();
 
@@ -71,22 +73,28 @@ pub fn run() {
       
       let separator1 = PredefinedMenuItem::separator(app)?;
       
+      let check_update_item = MenuItemBuilder::new("Check for Updates")
+        .build(app)?;
+      
+      let separator2 = PredefinedMenuItem::separator(app)?;
+      
       let autostart_item = CheckMenuItemBuilder::new("Start at Login")
         .checked(is_enabled)
         .build(app)?;
       
-      let separator2 = PredefinedMenuItem::separator(app)?;
+      let separator3 = PredefinedMenuItem::separator(app)?;
       
       let quit_item = MenuItemBuilder::new("Quit")
         .build(app)?;
 
       // Store menu item IDs for use in the closure
+      let check_update_id = check_update_item.id().clone();
       let autostart_id = autostart_item.id().clone();
       let quit_id = quit_item.id().clone();
 
       let menu = Menu::with_items(
         app,
-        &[&version_item, &separator1, &autostart_item, &separator2, &quit_item],
+        &[&version_item, &separator1, &check_update_item, &separator2, &autostart_item, &separator3, &quit_item],
       )?;
 
       // Load and decode the tray icon PNG
@@ -102,7 +110,43 @@ pub fn run() {
         .icon_as_template(true)  // macOS template icon for theme adaptation
         .menu(&menu)
         .on_menu_event(move |app, event| {
-          if event.id == autostart_id {
+          if event.id == check_update_id {
+            println!("Checking for updates...");
+            let app_handle = app.clone();
+            tauri::async_runtime::spawn(async move {
+              match app_handle.updater() {
+                Ok(updater) => {
+                  match updater.check().await {
+                    Ok(update_response) => {
+                      if let Some(update) = update_response {
+                        println!("Update available: version {}", update.version);
+                        println!("Download URL: {}", update.download_url);
+                        
+                        // Download and install the update
+                        match update.download_and_install(|chunk_length, content_length| {
+                          if let Some(total) = content_length {
+                            let progress = (chunk_length as f64 / total as f64) * 100.0;
+                            println!("Download progress: {:.1}%", progress);
+                          }
+                        }, || {
+                          println!("Download complete, preparing to install...");
+                        }).await {
+                          Ok(_) => {
+                            println!("Update installed successfully. Restart the app to apply.");
+                          }
+                          Err(e) => println!("Failed to download/install update: {:?}", e),
+                        }
+                      } else {
+                        println!("No updates available");
+                      }
+                    }
+                    Err(e) => println!("Failed to check for updates: {:?}", e),
+                  }
+                }
+                Err(e) => println!("Failed to initialize updater: {:?}", e),
+              }
+            });
+          } else if event.id == autostart_id {
             let autostart_manager = app.autolaunch();
             let is_enabled = autostart_manager.is_enabled().unwrap_or(false);
             
