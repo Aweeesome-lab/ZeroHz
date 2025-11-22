@@ -39,12 +39,6 @@ export default function Home() {
             >
               Support
             </Link>
-            <Link
-              href="https://github.com/username/zerohz"
-              className="hover:text-black transition-colors"
-            >
-              <Github size={20} />
-            </Link>
           </div>
         </div>
       </nav>
@@ -190,9 +184,6 @@ export default function Home() {
             ZeroHz
           </div>
           <p>&copy; {new Date().getFullYear()} ZeroHz. All rights reserved.</p>
-          <p className="mt-2">
-            Designed for focus. Built with Tauri & Next.js.
-          </p>
         </div>
       </footer>
     </div>
