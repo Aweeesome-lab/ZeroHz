@@ -63,14 +63,14 @@ export default function Home() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
             <Link
-              href="https://github.com/username/zerohz/releases/latest/download/ZeroHz.dmg"
+              href="https://github.com/Aweeesome-lab/ZeroHz/releases/latest"
               className="group relative px-8 py-4 bg-black text-white rounded-full font-semibold hover:bg-black/80 transition-all flex items-center gap-2 shadow-lg shadow-black/20"
             >
               <Download size={20} />
               Download for Mac
             </Link>
             <Link
-              href="https://github.com/username/zerohz/releases/latest/download/ZeroHz-setup.exe"
+              href="https://github.com/Aweeesome-lab/ZeroHz/releases/latest"
               className="px-8 py-4 bg-gray-100 text-black rounded-full font-semibold hover:bg-gray-200 transition-all flex items-center gap-2 border border-black/5"
             >
               <Monitor size={20} />
@@ -152,7 +152,7 @@ export default function Home() {
           </p>
           <div className="flex justify-center gap-4">
             <Link
-              href="https://github.com/username/zerohz/issues"
+              href="https://github.com/Aweeesome-lab/ZeroHz/issues"
               className="flex items-center gap-2 px-6 py-3 bg-white border border-black/10 rounded-lg hover:bg-gray-50 transition-colors font-medium"
             >
               <Github size={18} />
