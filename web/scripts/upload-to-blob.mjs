@@ -16,9 +16,18 @@ async function upload() {
 
     console.log(`Uploading ${filename} to Vercel Blob...`);
 
+    if (!process.env.ZEROHZ_READ_WRITE_TOKEN) {
+      console.error(
+        "Error: ZEROHZ_READ_WRITE_TOKEN environment variable is missing!"
+      );
+      console.log("Available environment variables:", Object.keys(process.env));
+    } else {
+      console.log("ZEROHZ_READ_WRITE_TOKEN is present.");
+    }
+
     const blob = await put(filename, file, {
       access: "public",
-      token: process.env.BLOB_READ_WRITE_TOKEN,
+      token: process.env.ZEROHZ_READ_WRITE_TOKEN,
     });
 
     console.log(`Uploaded to: ${blob.url}`);
