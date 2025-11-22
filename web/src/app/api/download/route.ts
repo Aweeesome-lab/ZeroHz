@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-interface GitHubReleaseAsset {
-  name: string;
-  browser_download_url: string;
-}
+import { list } from "@vercel/blob";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -17,33 +14,34 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const response = await fetch(
-      "https://api.github.com/repos/Aweeesome-lab/ZeroHz/releases/latest",
-      {
-        headers: {
-          "User-Agent": "ZeroHz-Web",
-        },
-        next: { revalidate: 60 }, // Cache for 60 seconds
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch releases");
-    }
-
-    const data = await response.json();
-    const assets: GitHubReleaseAsset[] = data.assets;
+    // List blobs from Vercel Blob storage
+    const { blobs } = await list({
+      token: process.env.BLOB_READ_WRITE_TOKEN,
+    });
 
     let downloadUrl = "";
 
     if (platform === "mac") {
-      // Find .dmg file
-      const asset = assets.find((a) => a.name.endsWith(".dmg"));
-      if (asset) downloadUrl = asset.browser_download_url;
+      // Find latest .dmg file
+      // Sort by uploadedAt desc to get the latest one
+      const asset = blobs
+        .filter((b) => b.pathname.endsWith(".dmg"))
+        .sort(
+          (a, b) =>
+            new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+        )[0];
+
+      if (asset) downloadUrl = asset.url;
     } else if (platform === "win") {
-      // Find .exe file (setup.exe)
-      const asset = assets.find((a) => a.name.endsWith(".exe"));
-      if (asset) downloadUrl = asset.browser_download_url;
+      // Find latest .exe file
+      const asset = blobs
+        .filter((b) => b.pathname.endsWith(".exe"))
+        .sort(
+          (a, b) =>
+            new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+        )[0];
+
+      if (asset) downloadUrl = asset.url;
     }
 
     if (downloadUrl) {
