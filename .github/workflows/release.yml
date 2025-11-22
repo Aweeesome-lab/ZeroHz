@@ -29,6 +29,9 @@ jobs:
         with:
           targets: x86_64-apple-darwin, aarch64-apple-darwin
 
+      - name: Rust cache
+        uses: swatinem/rust-cache@v2
+
       - name: Install frontend dependencies
         run: npm install
 
