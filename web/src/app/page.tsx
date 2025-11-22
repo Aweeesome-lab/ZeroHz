@@ -155,7 +155,7 @@ export default function Home() {
           </p>
           <div className="flex justify-center gap-4">
             <Link
-              href="https://www.threads.net/@nerd_makr"
+              href="https://www.threads.com/@nerd_makr"
               className="flex items-center gap-2 px-6 py-3 bg-white border border-black/10 rounded-lg hover:bg-gray-50 transition-colors font-medium"
             >
               <Mail size={18} />
