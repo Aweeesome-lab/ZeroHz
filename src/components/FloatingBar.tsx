@@ -188,8 +188,8 @@ export default function FloatingBar() {
       const shouldPlay = activeSounds.has(sound.id);
 
       if (shouldPlay && !isPlayingNode) {
-        // Resume context if suspended (browser policy)
-        if (audioContextRef.current?.state === "suspended") {
+        // Resume context if suspended (browser policy) AND we are currently playing
+        if (isPlaying && audioContextRef.current?.state === "suspended") {
           audioContextRef.current.resume();
         }
         playSound(sound.id);
@@ -197,7 +197,7 @@ export default function FloatingBar() {
         stopSound(sound.id);
       }
     });
-  }, [activeSounds, playSound, stopSound]);
+  }, [activeSounds, playSound, stopSound, isPlaying]);
 
   // Handle volume/mute changes
   useEffect(() => {
