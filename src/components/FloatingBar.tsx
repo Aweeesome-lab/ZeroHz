@@ -214,6 +214,80 @@ export default function FloatingBar() {
     });
   }, [volumes, isMuted]);
 
+  const [isResizing, setIsResizing] = useState(false);
+
+  // Resize and center window on mode change
+  useEffect(() => {
+    const updateWindowSize = async () => {
+      // Only trigger resize logic if we are already "resizing" (faded out)
+      // or if it's the initial mount (optional, but good for safety)
+      if (!isResizing) return;
+
+      try {
+        // Dynamic import to avoid SSR issues
+        const {
+          getCurrentWindow,
+          LogicalSize,
+          PhysicalPosition,
+          currentMonitor,
+        } = await import("@tauri-apps/api/window");
+        const appWindow = getCurrentWindow();
+
+        // Get current monitor to calculate center position
+        const monitor = await currentMonitor();
+
+        if (monitor) {
+          const monitorSize = monitor.size;
+          const monitorPosition = monitor.position;
+
+          let width, height;
+
+          if (isCompact) {
+            width = 250;
+            height = 60;
+          } else {
+            width = 400;
+            height = 100;
+          }
+
+          // Resize first
+          await appWindow.setSize(new LogicalSize(width, height));
+
+          // Calculate new center X position
+          const scaleFactor = monitor.scaleFactor;
+          const physicalWidth = width * scaleFactor;
+
+          const x =
+            monitorPosition.x +
+            Math.round((monitorSize.width - physicalWidth) / 2);
+
+          // Keep Y position fixed (top of screen)
+          const currentPos = await appWindow.outerPosition();
+          const y = currentPos.y;
+
+          await appWindow.setPosition(new PhysicalPosition(x, y));
+        }
+      } catch (error) {
+        console.error("Failed to resize/reposition window:", error);
+      } finally {
+        // Small delay to ensure window resize is rendered before showing content
+        setTimeout(() => setIsResizing(false), 50);
+      }
+    };
+
+    updateWindowSize();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCompact]); // Run when isCompact changes
+
+  const handleToggleCompact = () => {
+    if (isResizing) return; // Prevent double clicks
+    setIsResizing(true);
+    // Wait for fade out animation (100ms) before changing state
+    setTimeout(() => {
+      setIsCompact((prev) => !prev);
+    }, 100);
+  };
+
   const toggleSound = (id: SoundType) => {
     setActiveSounds((prev) => {
       const newSet = new Set(prev);
@@ -232,13 +306,16 @@ export default function FloatingBar() {
 
   return (
     <div
-      className="flex justify-center items-center w-full h-full"
+      className={cn(
+        "flex justify-center items-center w-full h-full transition-opacity duration-100",
+        isResizing ? "opacity-0" : "opacity-100"
+      )}
       data-tauri-drag-region
     >
       <div
         className={cn(
-          "flex items-center gap-3 p-2.5 rounded-full bg-[#1A1A1A]/95 backdrop-blur-lg border border-white/20 transition-all duration-300 ease-in-out hover:bg-[#242424]/90",
-          isCompact ? "px-3 py-1.5 gap-2" : ""
+          "flex items-center gap-3 p-2.5 rounded-full bg-[#1A1A1A]/95 transition-all duration-300 ease-in-out hover:bg-[#242424]/90",
+          isCompact ? "px-3 py-1.5 gap-2" : "border border-white/20"
         )}
         data-tauri-drag-region
       >
@@ -346,7 +423,7 @@ export default function FloatingBar() {
         />
 
         <button
-          onClick={() => setIsCompact(!isCompact)}
+          onClick={handleToggleCompact}
           className="p-1.5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all"
           title={isCompact ? "Expand" : "Compact Mode"}
           data-tauri-drag-region="false"
