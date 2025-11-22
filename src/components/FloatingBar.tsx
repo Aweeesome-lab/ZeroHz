@@ -202,7 +202,7 @@ export default function FloatingBar() {
       data-tauri-drag-region
     >
       <div
-        className="flex items-center gap-3 p-2.5 rounded-full bg-black/50 backdrop-blur-lg border border-white/20 transition-all hover:bg-black/55"
+        className="flex items-center gap-3 p-2.5 rounded-full bg-[#1A1A1A]/95 backdrop-blur-lg border border-white/20 transition-all hover:bg-[#242424]/90"
         data-tauri-drag-region
       >
         {SOUNDS.map((sound) => {
