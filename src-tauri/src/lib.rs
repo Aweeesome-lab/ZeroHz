@@ -1,7 +1,7 @@
 use tauri::{
   menu::{Menu, MenuItem},
   tray::{MouseButton, TrayIconBuilder, TrayIconEvent},
-  Manager,
+  Manager, PhysicalPosition,
 };
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -9,6 +9,25 @@ pub fn run() {
   tauri::Builder::default()
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();
+
+      // Position window at top center of the screen
+      if let Some(monitor) = window.current_monitor().ok().flatten() {
+        let monitor_size = monitor.size();
+        let monitor_position = monitor.position();
+        let window_size = window.outer_size().unwrap();
+        
+        // Calculate center X position
+        let x = monitor_position.x + (monitor_size.width as i32 - window_size.width as i32) / 2;
+        
+        // Position at top of screen, below status bar (25px on macOS)
+        #[cfg(target_os = "macos")]
+        let y = monitor_position.y + 25;
+        
+        #[cfg(not(target_os = "macos"))]
+        let y = monitor_position.y + 10;
+        
+        let _ = window.set_position(PhysicalPosition::new(x, y));
+      }
 
       #[cfg(target_os = "macos")]
       {
@@ -22,6 +41,10 @@ pub fn run() {
           let bg_color = NSColor::colorWithRed_green_blue_alpha(0.0, 0.0, 0.0, 0.0);
           let _: () = msg_send![ns_window, setBackgroundColor: &*bg_color];
           let _: () = msg_send![ns_window, setOpaque: false];
+          
+          // Make window appear on all desktop spaces (Spaces)
+          // NSWindowCollectionBehaviorCanJoinAllSpaces = 1 << 0
+          let _: () = msg_send![ns_window, setCollectionBehavior: 1u64];
         }
       }
 
