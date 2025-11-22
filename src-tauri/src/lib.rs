@@ -43,8 +43,11 @@ pub fn run() {
           let _: () = msg_send![ns_window, setOpaque: false];
           
           // Make window appear on all desktop spaces (Spaces)
-          // NSWindowCollectionBehaviorCanJoinAllSpaces = 1 << 0
-          let _: () = msg_send![ns_window, setCollectionBehavior: 1u64];
+          // NSWindowCollectionBehaviorCanJoinAllSpaces (1)
+          // NSWindowCollectionBehaviorStationary (16) - stays on screen when switching spaces
+          // NSWindowCollectionBehaviorFullScreenAuxiliary (256) - allows showing over fullscreen apps
+          let behavior: u64 = 1 | 16 | 256;
+          let _: () = msg_send![ns_window, setCollectionBehavior: behavior];
         }
       }
 
