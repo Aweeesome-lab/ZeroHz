@@ -1,4 +1,4 @@
-import { put } from "@vercel/blob";
+import { put, list, del } from "@vercel/blob";
 import fs from "fs";
 import path from "path";
 
@@ -25,9 +25,24 @@ async function upload() {
       console.log("ZEROHZ_READ_WRITE_TOKEN is present.");
     }
 
+    // Check if blob exists and delete it
+    const { blobs } = await list({
+      token: process.env.ZEROHZ_READ_WRITE_TOKEN,
+    });
+
+    const existingBlob = blobs.find((b) => b.pathname === filename);
+    if (existingBlob) {
+      console.log(`Blob ${filename} already exists. Deleting...`);
+      await del(existingBlob.url, {
+        token: process.env.ZEROHZ_READ_WRITE_TOKEN,
+      });
+      console.log("Deleted existing blob.");
+    }
+
     const blob = await put(filename, file, {
       access: "public",
       token: process.env.ZEROHZ_READ_WRITE_TOKEN,
+      addRandomSuffix: false,
     });
 
     console.log(`Uploaded to: ${blob.url}`);
