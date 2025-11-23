@@ -1,6 +1,7 @@
 "use client";
 
 import { track } from "@vercel/analytics";
+import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 import { ReactNode } from "react";
 
@@ -15,12 +16,15 @@ export default function DownloadButton({
   children,
   className,
 }: DownloadButtonProps) {
+  const posthog = usePostHog();
+
   return (
     <Link
       href={`/api/download?platform=${platform}`}
       className={className}
       onClick={() => {
         track("Download", { platform });
+        posthog?.capture("download_clicked", { platform });
       }}
     >
       {children}
