@@ -42,7 +42,7 @@ export default function Home() {
         <div className="container mx-auto max-w-5xl text-center space-y-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/5 border border-black/5 text-xs font-medium text-black/60">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            v0.1.6 Available Now
+            v0.1.7 Available Now
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-linear-to-b from-black to-black/60 pb-2">
@@ -94,18 +94,18 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             <FeatureCard
               icon={<Zap />}
-              title="Instant Focus"
-              description="One click to start playing. No accounts, no ads, no distractions."
+              title="One-Click Serenity"
+              description="Instantly accessible from your menu bar. No accounts, no ads, just pure focus."
             />
             <FeatureCard
               icon={<Moon />}
-              title="Dark Mode Native"
-              description="Designed for modern operating systems. Looks great in light or dark mode."
+              title="Seamless Design"
+              description="Native look and feel that adapts perfectly to your system's light or dark mode."
             />
             <FeatureCard
               icon={<Monitor />}
-              title="Cross Platform"
-              description="Built with Tauri. Optimized for both macOS and Windows."
+              title="Offline Ready"
+              description="Built with Tauri for maximum performance. Works completely offline without internet."
             />
           </div>
         </div>
@@ -119,23 +119,14 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
-              version="v0.1.6"
-              date="November 22, 2025"
+              version="v0.1.7"
+              date="November 23, 2025"
               changes={[
-                "Hotfix: Resolved build dependency issues",
-                "Improved download system using Vercel Blob",
-                "Fixed direct download links for private repository access",
-              ]}
-            />
-            <ReleaseItem
-              version="v0.1.6"
-              date="November 22, 2025"
-              changes={[
-                "Initial release of ZeroHz",
-                "Support for macOS (DMG) and Windows (EXE)",
+                "Initial Beta Release",
+                "Support for macOS (Universal Binary) and Windows",
                 "4 high-quality nature sounds: Wind, Rain, Fire, Waves",
-                "Minimalist floating bar interface",
-                "Compact mode for distraction-free focus",
+                "Minimalist floating bar interface with compact mode",
+                "Native system tray integration",
               ]}
             />
           </div>
