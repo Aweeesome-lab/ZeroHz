@@ -12,7 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [macos-latest]
+        platform: [macos-latest, windows-latest]
+
     runs-on: ${{ matrix.platform }}
 
     steps:
@@ -27,7 +28,7 @@ jobs:
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: x86_64-apple-darwin, aarch64-apple-darwin
+          targets: ${{ matrix.platform == 'macos-latest' && 'x86_64-apple-darwin,aarch64-apple-darwin' || '' }}
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
@@ -53,15 +54,20 @@ jobs:
           releaseBody: "See the assets to download this version and install."
           releaseDraft: true
           prerelease: false
-          args: --target universal-apple-darwin
+          args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || '' }}
 
       - name: Upload assets to Vercel Blob
-        if: matrix.platform == 'macos-latest'
+        if: matrix.platform == 'macos-latest' || matrix.platform == 'windows-latest'
+        shell: bash
         env:
           ZEROHZ_READ_WRITE_TOKEN: ${{ secrets.ZEROHZ_READ_WRITE_TOKEN }}
         run: |
-          # Find the built asset
-          ASSET_PATH=$(find src-tauri/target/universal-apple-darwin/release/bundle/dmg -name "*.dmg" | head -n 1)
+          # Find the built asset based on platform
+          if [[ "${{ matrix.platform }}" == "macos-latest" ]]; then
+            ASSET_PATH=$(find src-tauri/target/universal-apple-darwin/release/bundle/dmg -name "*.dmg" | head -n 1)
+          else
+            ASSET_PATH=$(find src-tauri/target/release/bundle/nsis -name "*.exe" | head -n 1)
+          fi
 
           if [ -n "$ASSET_PATH" ]; then
             echo "Found asset: $ASSET_PATH"
