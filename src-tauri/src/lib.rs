@@ -58,6 +58,13 @@ pub fn run() {
         }
       }
 
+      #[cfg(target_os = "windows")]
+      {
+        // Ensure decorations are off and shadow is removed to prevent artifacts
+        let _ = window.set_decorations(false);
+        let _ = window.set_shadow(false);
+      }
+
       // Get app version from Cargo.toml
       let version = env!("CARGO_PKG_VERSION");
       let version_text = format!("Version {}", version);
