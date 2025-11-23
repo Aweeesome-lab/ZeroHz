@@ -64,13 +64,13 @@ export default function Home() {
               <Download size={20} />
               Download for Mac
             </DownloadButton>
-            {/* <Link
-              href="/api/download?platform=win"
+            <DownloadButton
+              platform="win"
               className="px-8 py-4 bg-gray-100 text-black rounded-full font-semibold hover:bg-gray-200 transition-all flex items-center gap-2 border border-black/5"
             >
               <Monitor size={20} />
               Download for Windows
-            </Link> */}
+            </DownloadButton>
           </div>
 
           {/* Interactive Demo */}
