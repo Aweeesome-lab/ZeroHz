@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Download, Moon, Monitor, Mail, Zap } from "lucide-react";
 import DemoPlayer from "../components/DemoPlayer";
+import DownloadButton from "../components/DownloadButton";
 import Image from "next/image";
 
 export default function Home() {
@@ -56,13 +57,13 @@ export default function Home() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-            <Link
-              href="/api/download?platform=mac"
+            <DownloadButton
+              platform="mac"
               className="group relative px-8 py-4 bg-black text-white rounded-full font-semibold hover:bg-black/80 transition-all flex items-center gap-2 shadow-lg shadow-black/20"
             >
               <Download size={20} />
               Download for Mac
-            </Link>
+            </DownloadButton>
             {/* <Link
               href="/api/download?platform=win"
               className="px-8 py-4 bg-gray-100 text-black rounded-full font-semibold hover:bg-gray-200 transition-all flex items-center gap-2 border border-black/5"
