@@ -41,11 +41,6 @@ export default function Home() {
       {/* Hero Section */}
       <main className="pt-32 pb-20 px-6">
         <div className="container mx-auto max-w-5xl text-center space-y-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/5 border border-black/5 text-xs font-medium text-black/60">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            v0.1.15 Available Now
-          </div>
-
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-linear-to-b from-black to-black/60 pb-2">
             Minimalist White Noise for Deep Focus.
           </h1>
