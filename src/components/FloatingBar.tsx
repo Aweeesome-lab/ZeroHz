@@ -304,7 +304,7 @@ export default function FloatingBar() {
             height = 60;
           } else {
             width = 500; // Reduced width for 3 items
-            height = 150; // Keep height for sliders
+            height = 100; // Keep height for sliders
           }
 
           // Resize first
