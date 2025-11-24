@@ -43,7 +43,7 @@ export default function Home() {
         <div className="container mx-auto max-w-5xl text-center space-y-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/5 border border-black/5 text-xs font-medium text-black/60">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            v0.1.13 Available Now
+            v0.1.14 Available Now
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-linear-to-b from-black to-black/60 pb-2">
@@ -120,7 +120,7 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
-              version="v0.1.13"
+              version="v0.1.14"
               date="November 24, 2025"
               changes={[
                 "Fixed sound playback issues on macOS",

@@ -1,0 +1,7 @@
+# Vercel Ignore
+.vercel
+.git
+.github
+node_modules
+src-tauri
+src-tauri/target
