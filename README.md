@@ -15,9 +15,18 @@
 
 - **🌊 High-Quality Nature Sounds**: Immerse yourself in Rain, Wind, Waves, Forest, Stream, Fire, Flight, Train, and Night sounds.
 - **🎛️ Custom Mixing**: Adjust the volume of each sound individually to create your unique atmosphere.
-- **🔄 Seamless Looping**: Enjoy uninterrupted, gapless playback for deep focus or sleep.
+- **🔄 Seamless Looping**: Uses M4A (AAC) format for uninterrupted, gapless playback on both macOS and Windows.
 - **🤏 Compact Mode**: A tiny, non-intrusive mini-player that stays out of your way while you work.
 - **🌙 Dark Theme**: Designed to be easy on the eyes, perfect for night-time usage.
+
+## 🛠️ Tech Stack
+
+ZeroHz is built with modern web technologies to ensure a lightweight and performant desktop experience:
+
+- **[Tauri v2](https://tauri.app/)**: For a tiny, secure, and fast native executable.
+- **[Next.js](https://nextjs.org/)**: React framework for the UI.
+- **[Tailwind CSS](https://tailwindcss.com/)**: For rapid and beautiful styling.
+- **[Lucide Icons](https://lucide.dev/)**: For consistent and clean iconography.
 
 ## 📥 Download
 
