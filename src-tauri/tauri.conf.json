@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "ZeroHz",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "identifier": "com.zerohz.app",
   "build": {
     "frontendDist": "../out",
@@ -14,9 +14,9 @@
       {
         "label": "main",
         "title": "White Noise",
-        "width": 400,
+        "width": 650,
         "height": 100,
-        "resizable": false,
+        "resizable": true,
         "fullscreen": false,
         "decorations": false,
         "transparent": true,

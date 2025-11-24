@@ -6,16 +6,32 @@ import {
   CloudRain,
   Flame,
   Waves,
+  Bird,
+  Droplets,
+  Plane,
+  TrainFront,
+  Moon,
   Volume2,
   VolumeX,
   Maximize2,
   Minimize2,
   Play,
   Pause,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type SoundType = "wind" | "rain" | "fire" | "waves";
+type SoundType =
+  | "rain"
+  | "wind"
+  | "waves"
+  | "forest"
+  | "stream"
+  | "fire"
+  | "flight"
+  | "train"
+  | "night";
 
 interface SoundControl {
   id: SoundType;
@@ -25,24 +41,49 @@ interface SoundControl {
 }
 
 const SOUNDS: SoundControl[] = [
-  { id: "wind", icon: Wind, label: "Wind", src: "/sounds/wind.ogg" },
+  // Nature
   { id: "rain", icon: CloudRain, label: "Rain", src: "/sounds/rain.ogg" },
-  { id: "fire", icon: Flame, label: "Fire", src: "/sounds/fire.ogg" },
+  { id: "wind", icon: Wind, label: "Wind", src: "/sounds/wind.ogg" },
   { id: "waves", icon: Waves, label: "Waves", src: "/sounds/waves.ogg" },
+  // Life
+  { id: "forest", icon: Bird, label: "Forest", src: "/sounds/forest.ogg" },
+  { id: "stream", icon: Droplets, label: "Stream", src: "/sounds/stream.ogg" },
+  { id: "fire", icon: Flame, label: "Fire", src: "/sounds/fire.ogg" },
+  // Places
+  { id: "flight", icon: Plane, label: "Flight", src: "/sounds/flight.ogg" },
+  { id: "train", icon: TrainFront, label: "Train", src: "/sounds/train.ogg" },
+  { id: "night", icon: Moon, label: "Night", src: "/sounds/night.ogg" },
 ];
 
 export default function FloatingBar() {
   const [activeSounds, setActiveSounds] = useState<Set<SoundType>>(new Set());
   const [volumes, setVolumes] = useState<Record<SoundType, number>>({
-    wind: 0.5,
     rain: 0.5,
-    fire: 0.5,
+    wind: 0.5,
     waves: 0.5,
+    forest: 0.5,
+    stream: 0.5,
+    fire: 0.5,
+    flight: 0.5,
+    train: 0.5,
+    night: 0.5,
   });
   const [isCompact, setIsCompact] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  const ITEMS_PER_SLIDE = 3;
+  const totalSlides = Math.ceil(SOUNDS.length / ITEMS_PER_SLIDE);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % totalSlides);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + totalSlides) % totalSlides);
+  };
 
   // Timer logic
   useEffect(() => {
@@ -68,24 +109,39 @@ export default function FloatingBar() {
   // Web Audio API refs
   const audioContextRef = useRef<AudioContext | null>(null);
   const gainNodesRef = useRef<Record<SoundType, GainNode | null>>({
-    wind: null,
     rain: null,
-    fire: null,
+    wind: null,
     waves: null,
+    forest: null,
+    stream: null,
+    fire: null,
+    flight: null,
+    train: null,
+    night: null,
   });
   const sourceNodesRef = useRef<
     Record<SoundType, AudioBufferSourceNode | null>
   >({
-    wind: null,
     rain: null,
-    fire: null,
+    wind: null,
     waves: null,
+    forest: null,
+    stream: null,
+    fire: null,
+    flight: null,
+    train: null,
+    night: null,
   });
   const audioBuffersRef = useRef<Record<SoundType, AudioBuffer | null>>({
-    wind: null,
     rain: null,
-    fire: null,
+    wind: null,
     waves: null,
+    forest: null,
+    stream: null,
+    fire: null,
+    flight: null,
+    train: null,
+    night: null,
   });
 
   // Initialize AudioContext
@@ -247,8 +303,8 @@ export default function FloatingBar() {
             width = 280; // Increased width for play button
             height = 60;
           } else {
-            width = 400;
-            height = 100;
+            width = 500; // Reduced width for 3 items
+            height = 150; // Keep height for sliders
           }
 
           // Resize first
@@ -373,54 +429,78 @@ export default function FloatingBar() {
         ) : (
           // Full Mode UI
           <>
-            {SOUNDS.map((sound) => {
-              const isActive = activeSounds.has(sound.id);
-              const Icon = sound.icon;
+            <button
+              onClick={prevSlide}
+              className="p-1.5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all"
+              data-tauri-drag-region="false"
+            >
+              <ChevronLeft size={16} />
+            </button>
 
-              return (
-                <div
-                  key={sound.id}
-                  className="relative group flex flex-col items-center"
-                >
-                  <button
-                    onClick={() => toggleSound(sound.id)}
-                    className={cn(
-                      "p-2.5 rounded-full transition-all duration-300 ease-in-out border-0",
-                      isActive
-                        ? "bg-white/90 text-black shadow-[0_0_15px_rgba(255,255,255,0.5)]"
-                        : "bg-transparent text-white/70 hover:bg-white/10 hover:text-white"
-                    )}
-                    title={sound.label}
-                    data-tauri-drag-region="false"
-                  >
-                    <Icon size={20} />
-                  </button>
+            <div className="flex gap-2">
+              {SOUNDS.slice(
+                currentSlide * ITEMS_PER_SLIDE,
+                (currentSlide + 1) * ITEMS_PER_SLIDE
+              ).map((sound) => {
+                const isActive = activeSounds.has(sound.id);
+                const Icon = sound.icon;
 
-                  {/* Volume Slider (Visible on hover/active) */}
+                return (
                   <div
-                    className={cn(
-                      "absolute -bottom-8 left-1/2 -translate-x-1/2 w-16 transition-all duration-200 origin-top z-50",
-                      isActive
-                        ? "opacity-0 group-hover:opacity-100 scale-100"
-                        : "opacity-0 scale-95 pointer-events-none"
-                    )}
+                    key={sound.id}
+                    className="relative group flex flex-col items-center"
                   >
-                    <input
-                      type="range"
-                      min="0"
-                      max="1"
-                      step="0.01"
-                      value={volumes[sound.id]}
-                      onChange={(e) =>
-                        handleVolumeChange(sound.id, parseFloat(e.target.value))
-                      }
-                      className="w-full h-1 bg-white/30 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full"
+                    <button
+                      onClick={() => toggleSound(sound.id)}
+                      className={cn(
+                        "p-2.5 rounded-full transition-all duration-300 ease-in-out border-0",
+                        isActive
+                          ? "bg-white/90 text-black shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+                          : "bg-transparent text-white/70 hover:bg-white/10 hover:text-white"
+                      )}
+                      title={sound.label}
                       data-tauri-drag-region="false"
-                    />
+                    >
+                      <Icon size={20} />
+                    </button>
+
+                    {/* Volume Slider (Visible on hover/active) */}
+                    <div
+                      className={cn(
+                        "absolute -bottom-8 left-1/2 -translate-x-1/2 w-16 transition-all duration-200 origin-top z-50",
+                        isActive
+                          ? "opacity-0 group-hover:opacity-100 scale-100"
+                          : "opacity-0 scale-95 pointer-events-none"
+                      )}
+                    >
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        value={volumes[sound.id]}
+                        onChange={(e) =>
+                          handleVolumeChange(
+                            sound.id,
+                            parseFloat(e.target.value)
+                          )
+                        }
+                        className="w-full h-1 bg-white/30 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:rounded-full"
+                        data-tauri-drag-region="false"
+                      />
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+
+            <button
+              onClick={nextSlide}
+              className="p-1.5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all"
+              data-tauri-drag-region="false"
+            >
+              <ChevronRight size={16} />
+            </button>
 
             <div className="w-px h-6 bg-white/20 mx-1" />
 
@@ -451,25 +531,40 @@ export default function FloatingBar() {
             >
               {isPlaying ? <Pause size={20} /> : <Play size={20} />}
             </button>
+
+            <div className="w-px h-6 bg-white/20 mx-1" />
+
+            <button
+              onClick={handleToggleCompact}
+              className="p-1.5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all"
+              title="Compact Mode"
+              data-tauri-drag-region="false"
+            >
+              <Minimize2 size={16} />
+            </button>
           </>
         )}
 
-        {/* Toggle Mode Button */}
-        <div
-          className={cn(
-            "w-px h-6 bg-white/20 mx-1",
-            isCompact && activeSounds.size === 0 ? "hidden" : ""
-          )}
-        />
+        {/* Toggle Mode Button (Only for Compact Mode) */}
+        {isCompact && (
+          <>
+            <div
+              className={cn(
+                "w-px h-6 bg-white/20 mx-1",
+                activeSounds.size === 0 ? "hidden" : ""
+              )}
+            />
 
-        <button
-          onClick={handleToggleCompact}
-          className="p-1.5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all"
-          title={isCompact ? "Expand" : "Compact Mode"}
-          data-tauri-drag-region="false"
-        >
-          {isCompact ? <Maximize2 size={14} /> : <Minimize2 size={14} />}
-        </button>
+            <button
+              onClick={handleToggleCompact}
+              className="p-1.5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all"
+              title="Expand"
+              data-tauri-drag-region="false"
+            >
+              <Maximize2 size={14} />
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
