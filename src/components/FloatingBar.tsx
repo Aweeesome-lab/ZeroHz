@@ -42,17 +42,17 @@ interface SoundControl {
 
 const SOUNDS: SoundControl[] = [
   // Nature
-  { id: "rain", icon: CloudRain, label: "Rain", src: "/sounds/rain.ogg" },
-  { id: "wind", icon: Wind, label: "Wind", src: "/sounds/wind.ogg" },
-  { id: "waves", icon: Waves, label: "Waves", src: "/sounds/waves.ogg" },
+  { id: "rain", icon: CloudRain, label: "Rain", src: "/sounds/rain.m4a" },
+  { id: "wind", icon: Wind, label: "Wind", src: "/sounds/wind.m4a" },
+  { id: "waves", icon: Waves, label: "Waves", src: "/sounds/waves.m4a" },
   // Life
-  { id: "forest", icon: Bird, label: "Forest", src: "/sounds/forest.ogg" },
-  { id: "stream", icon: Droplets, label: "Stream", src: "/sounds/stream.ogg" },
-  { id: "fire", icon: Flame, label: "Fire", src: "/sounds/fire.ogg" },
+  { id: "forest", icon: Bird, label: "Forest", src: "/sounds/forest.m4a" },
+  { id: "stream", icon: Droplets, label: "Stream", src: "/sounds/stream.m4a" },
+  { id: "fire", icon: Flame, label: "Fire", src: "/sounds/fire.m4a" },
   // Places
-  { id: "flight", icon: Plane, label: "Flight", src: "/sounds/flight.ogg" },
-  { id: "train", icon: TrainFront, label: "Train", src: "/sounds/train.ogg" },
-  { id: "night", icon: Moon, label: "Night", src: "/sounds/night.ogg" },
+  { id: "flight", icon: Plane, label: "Flight", src: "/sounds/flight.m4a" },
+  { id: "train", icon: TrainFront, label: "Train", src: "/sounds/train.m4a" },
+  { id: "night", icon: Moon, label: "Night", src: "/sounds/night.m4a" },
 ];
 
 export default function FloatingBar() {

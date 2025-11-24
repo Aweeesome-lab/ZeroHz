@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.15] - 2025-11-24
+
+### Fixed
+
+- Replaced MP3 audio files with M4A (AAC) format to ensure gapless looping on all platforms (macOS/Windows).
+
 ## [0.1.14] - 2025-11-24
 
 ### Fixed
