@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.14] - 2025-11-24
+
+### Fixed
+
+- Fixed sound playback issue on macOS by updating audio file references to `.mp3`.
+
 ## [0.1.13] - 2025-11-24
 
 ### Fixed
