@@ -43,7 +43,7 @@ export default function Home() {
         <div className="container mx-auto max-w-5xl text-center space-y-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-black/5 border border-black/5 text-xs font-medium text-black/60">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            v0.1.12 Available Now
+            v0.1.13 Available Now
           </div>
 
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-linear-to-b from-black to-black/60 pb-2">
@@ -120,47 +120,11 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
-              version="v0.1.12"
-              date="November 23, 2025"
+              version="v0.1.13"
+              date="November 24, 2025"
               changes={[
-                "Clean deployment with PostHog environment variables",
-                "Improved release workflow reliability",
-              ]}
-            />
-            <ReleaseItem
-              version="v0.1.11"
-              date="November 23, 2025"
-              changes={[
-                "Integrated PostHog analytics",
-                "Added download tracking events",
-              ]}
-            />
-            <ReleaseItem
-              version="v0.1.10"
-              date="November 23, 2025"
-              changes={[
-                "Fixed Windows transparency issues",
-                "Improved CI/CD pipeline",
-              ]}
-            />
-            <ReleaseItem
-              version="v0.1.8"
-              date="November 23, 2025"
-              changes={[
-                "Added Windows Support (Beta)",
-                "Fixed macOS Gatekeeper warning explanation",
-                "Improved build process for multi-platform support",
-              ]}
-            />
-            <ReleaseItem
-              version="v0.1.7"
-              date="November 23, 2025"
-              changes={[
-                "Initial Beta Release",
-                "Support for macOS (Universal Binary) and Windows",
-                "4 high-quality nature sounds: Wind, Rain, Fire, Waves",
-                "Minimalist floating bar interface with compact mode",
-                "Native system tray integration",
+                "Fixed sound playback issues on macOS",
+                "Improved audio compatibility (MP3)",
               ]}
             />
           </div>
