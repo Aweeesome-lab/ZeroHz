@@ -54,7 +54,7 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: "v__VERSION__"
           releaseBody: "See the assets to download this version and install."
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || '' }}
 
@@ -88,8 +88,9 @@ jobs:
         shell: bash
         run: |
           if [ -n "${{ secrets.WEBHOOK_URL }}" ]; then
+            PLATFORM="${{ matrix.platform == 'macos-latest' && 'macOS' || 'Windows' }}"
             curl -X POST -H 'Content-type: application/json' \
-            --data '{"text":"🚀 Deployment Successful! Version: ${{ github.ref_name }}"}' \
+            --data "{\"text\":\"Deployment Successful - ${PLATFORM} - Version: ${{ github.ref_name }}\"}" \
             ${{ secrets.WEBHOOK_URL }}
           else
             echo "WEBHOOK_URL secret not found, skipping notification."
