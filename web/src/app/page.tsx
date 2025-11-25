@@ -147,6 +147,14 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
+              version="v0.1.18"
+              date="November 25, 2025"
+              changes={[
+                "Fixed auto-update functionality - updates now work correctly",
+                "Improved deployment notifications with platform info",
+              ]}
+            />
+            <ReleaseItem
               version="v0.1.17"
               date="November 25, 2025"
               changes={[
