@@ -82,3 +82,14 @@ jobs:
             echo "No asset found to upload"
             exit 1
           fi
+
+      - name: Send Webhook Notification
+        if: success()
+        run: |
+          if [ -n "${{ secrets.WEBHOOK_URL }}" ]; then
+            curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":"🚀 Deployment Successful! Version: ${{ github.ref_name }}"}' \
+            ${{ secrets.WEBHOOK_URL }}
+          else
+            echo "WEBHOOK_URL secret not found, skipping notification."
+          fi
