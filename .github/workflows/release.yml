@@ -95,3 +95,63 @@ jobs:
           else
             echo "WEBHOOK_URL secret not found, skipping notification."
           fi
+
+  create-updater-json:
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create latest.json for updater
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get release info
+          RELEASE_DATA=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.ref_name }}")
+          
+          VERSION=$(echo "$RELEASE_DATA" | jq -r '.tag_name')
+          NOTES=$(echo "$RELEASE_DATA" | jq -r '.body')
+          PUBDATE=$(echo "$RELEASE_DATA" | jq -r '.published_at')
+          
+          # Find signature files from assets
+          DMG_SIG=$(echo "$RELEASE_DATA" | jq -r '.assets[] | select(.name | endswith(".dmg.sig")) | .browser_download_url')
+          EXE_SIG=$(echo "$RELEASE_DATA" | jq -r '.assets[] | select(.name | endswith(".nsis.zip.sig")) | .browser_download_url')
+          
+          # Find installer files
+          DMG_URL=$(echo "$RELEASE_DATA" | jq -r '.assets[] | select(.name | endswith(".dmg")) | .browser_download_url')
+          EXE_URL=$(echo "$RELEASE_DATA" | jq -r '.assets[] | select(.name | endswith("x64-setup.exe")) | .browser_download_url')
+          
+          # Download signatures
+          DMG_SIG_CONTENT=$(curl -sL "$DMG_SIG")
+          EXE_SIG_CONTENT=$(curl -sL "$EXE_SIG")
+          
+          # Create latest.json
+          cat > latest.json << EOF
+          {
+            "version": "$VERSION",
+            "notes": "$NOTES",
+            "pub_date": "$PUBDATE",
+            "platforms": {
+              "darwin-universal": {
+                "signature": "$DMG_SIG_CONTENT",
+                "url": "$DMG_URL"
+              },
+              "windows-x86_64": {
+                "signature": "$EXE_SIG_CONTENT",
+                "url": "$EXE_URL"
+              }
+            }
+          }
+          EOF
+          
+          # Upload to release
+          RELEASE_ID=$(echo "$RELEASE_DATA" | jq -r '.id')
+          curl -X POST \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @latest.json \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/${RELEASE_ID}/assets?name=latest.json"
