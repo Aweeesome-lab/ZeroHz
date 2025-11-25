@@ -91,6 +91,7 @@ export default function DemoPlayer({
           audio.play().catch(() => {
             // Auto-play policy might block this without user interaction
             console.log("Playback prevented by browser policy");
+            setIsPlaying(false);
           });
         }
       } else {
