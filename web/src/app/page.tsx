@@ -71,7 +71,39 @@ export default function Home() {
           {/* Interactive Demo */}
           <div className="mt-20 relative">
             <div className="relative z-20">
-              <DemoPlayer />
+              <div className="text-center mb-8 animate-fade-in">
+                <p className="text-sm font-medium text-black/40 uppercase tracking-widest mb-2">
+                  Interactive Demo
+                </p>
+                <p className="text-xl text-black/80 font-serif italic">
+                  Turn up your volume and click to experience
+                </p>
+              </div>
+              <div className="flex justify-center -mt-2">
+                <svg
+                  width="40"
+                  height="80"
+                  viewBox="0 0 60 100"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="text-black/30"
+                  style={{ transform: "rotate(-5deg)" }}
+                >
+                  <g
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    {/* Shaft - Simple curve */}
+                    <path d="M30 10 C 30 10, 45 40, 30 90" />
+
+                    {/* Arrowhead */}
+                    <path d="M18 78 L 30 90 L 42 75" />
+                  </g>
+                </svg>
+              </div>
+              <DemoPlayer className="animate-breathe" />
               <p className="text-xs text-black/30 mt-4">
                 * Web demo simulates the UI. Download the app for full system
                 integration.

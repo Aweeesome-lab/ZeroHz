@@ -30,8 +30,13 @@ const SOUNDS: SoundControl[] = [
   { id: "waves", icon: Waves, label: "Waves" },
 ];
 
-export default function DemoPlayer() {
-  const [activeSounds, setActiveSounds] = useState<Set<SoundType>>(new Set());
+export default function DemoPlayer({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  const [activeSounds, setActiveSounds] = useState<Set<SoundType>>(
+    new Set(["rain"])
+  );
   const [volumes, setVolumes] = useState<Record<SoundType, number>>({
     wind: 0.5,
     rain: 0.5,
@@ -41,7 +46,7 @@ export default function DemoPlayer() {
   const [isCompact, setIsCompact] = useState(false);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false); // Default to false for web demo
+  const [isPlaying, setIsPlaying] = useState(true);
 
   // Audio refs
   const audioRefs = useRef<Record<SoundType, HTMLAudioElement | null>>({
@@ -169,7 +174,10 @@ export default function DemoPlayer() {
   };
 
   return (
-    <div className="flex justify-center items-center w-full py-12">
+    <div
+      className={cn("flex justify-center items-center w-full py-12", className)}
+      {...props}
+    >
       <div
         className={cn(
           "flex items-center gap-3 p-2.5 rounded-full bg-[#1A1A1A] shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all duration-300 ease-in-out border border-white/10 hover:scale-105 hover:shadow-[0_30px_60px_rgba(0,0,0,0.6)]",
