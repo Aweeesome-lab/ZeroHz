@@ -1,0 +1,19 @@
+{
+  "exclude": [
+    "target",
+    "node_modules",
+    "dist",
+    ".next",
+    "out",
+    "web",
+    "src-tauri/target",
+    "src-tauri/gen",
+    "**/generated",
+    "**/*.wasm"
+  ],
+  "cargo": {
+    "buildScripts": {
+      "enable": false
+    }
+  }
+}
