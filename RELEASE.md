@@ -18,14 +18,17 @@
 
 #### `TAURI_PRIVATE_KEY`
 
-서명에 사용되는 개인 키입니다. 다음 값을 복사해서 붙여넣으세요:
-
-```
-***REMOVED***
-```
+서명에 사용되는 개인 키입니다.
 
 > [!CAUTION]
 > 이 키는 절대 공개되어서는 안 됩니다! GitHub Secrets에만 보관하고 코드에 커밋하지 마세요.
+
+키 생성 방법:
+```bash
+pnpm tauri signer generate -w ~/.tauri/ZeroHz.key
+```
+
+생성된 private key (`~/.tauri/ZeroHz.key` 내용)를 GitHub Secrets에 저장하세요.
 
 #### `TAURI_KEY_PASSWORD`
 
