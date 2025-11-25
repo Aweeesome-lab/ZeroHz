@@ -147,11 +147,31 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
+              version="v0.1.16"
+              date="November 25, 2025"
+              changes={[
+                "Sound menu now displays 4 icons per slide",
+                "Added 2 new sounds: Keyboard and Thunder",
+              ]}
+            />
+            <ReleaseItem
               version="v0.1.15"
               date="November 24, 2025"
               changes={[
                 "Fixed sound playback issues on macOS",
-                "Improved audio compatibility (MP3)",
+                "Improved audio compatibility",
+                "Added 5 new sounds: Forest, Stream, Flight, Train, Night",
+              ]}
+            />
+            <ReleaseItem
+              version="v0.1.0"
+              date="November 23, 2025"
+              changes={[
+                "Initial release",
+                "Basic white noise player functionality",
+                "Included 4 ambient sounds: Rain, Wind, Waves, and Fire",
+                "Expand/Collapse mode support",
+                "Time tracking functionality",
               ]}
             />
           </div>
