@@ -85,6 +85,7 @@ jobs:
 
       - name: Send Webhook Notification
         if: success()
+        shell: bash
         run: |
           if [ -n "${{ secrets.WEBHOOK_URL }}" ]; then
             curl -X POST -H 'Content-type: application/json' \

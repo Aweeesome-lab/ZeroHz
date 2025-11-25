@@ -14,6 +14,7 @@ pub fn run() {
       None, // No additional arguments
     ))
     .plugin(tauri_plugin_updater::Builder::new().build())
+    .plugin(tauri_plugin_dialog::init())
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();
 
@@ -134,28 +135,74 @@ pub fn run() {
                         println!("Update available: version {}", update.version);
                         println!("Download URL: {}", update.download_url);
                         
-                        // Download and install the update
-                        match update.download_and_install(|chunk_length, content_length| {
-                          if let Some(total) = content_length {
-                            let progress = (chunk_length as f64 / total as f64) * 100.0;
-                            println!("Download progress: {:.1}%", progress);
+                        // Show dialog to user about available update
+                        use tauri_plugin_dialog::{DialogExt, MessageDialogKind, MessageDialogButtons};
+                        let confirmed = app_handle.dialog()
+                          .message(format!("New version {} is available. Would you like to download and install it?", update.version))
+                          .title("Update Available")
+                          .buttons(MessageDialogButtons::OkCancelCustom("Install".to_string(), "Later".to_string()))
+                          .blocking_show();
+                        
+                        if confirmed {
+                          // User clicked Install
+                          match update.download_and_install(|chunk_length, content_length| {
+                            if let Some(total) = content_length {
+                              let progress = (chunk_length as f64 / total as f64) * 100.0;
+                              println!("Download progress: {:.1}%", progress);
+                            }
+                          }, || {
+                            println!("Download complete, preparing to install...");
+                          }).await {
+                            Ok(_) => {
+                              println!("Update installed successfully. Restart the app to apply.");
+                              // Notify user that update is ready
+                              app_handle.dialog()
+                                .message("Update installed successfully! Please restart ZeroHz to apply the update.")
+                                .title("Update Ready")
+                                .kind(MessageDialogKind::Info)
+                                .blocking_show();
+                            }
+                            Err(e) => {
+                              println!("Failed to download/install update: {:?}", e);
+                              app_handle.dialog()
+                                .message("Failed to download or install the update. Please try again later.")
+                                .title("Update Error")
+                                .kind(MessageDialogKind::Error)
+                                .blocking_show();
+                            }
                           }
-                        }, || {
-                          println!("Download complete, preparing to install...");
-                        }).await {
-                          Ok(_) => {
-                            println!("Update installed successfully. Restart the app to apply.");
-                          }
-                          Err(e) => println!("Failed to download/install update: {:?}", e),
                         }
                       } else {
                         println!("No updates available");
+                        // Notify user that app is up to date
+                        use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+                        app_handle.dialog()
+                          .message(format!("You are already running the latest version (v{}).", env!("CARGO_PKG_VERSION")))
+                          .title("No Updates Available")
+                          .kind(MessageDialogKind::Info)
+                          .blocking_show();
                       }
                     }
-                    Err(e) => println!("Failed to check for updates: {:?}", e),
+                    Err(e) => {
+                      println!("Failed to check for updates: {:?}", e);
+                      use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+                      app_handle.dialog()
+                        .message("Failed to check for updates. Please check your internet connection and try again.")
+                        .title("Update Check Failed")
+                        .kind(MessageDialogKind::Error)
+                        .blocking_show();
+                    }
                   }
                 }
-                Err(e) => println!("Failed to initialize updater: {:?}", e),
+                Err(e) => {
+                  println!("Failed to initialize updater: {:?}", e);
+                  use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+                  app_handle.dialog()
+                    .message("Failed to initialize the updater. Please try again later.")
+                    .title("Updater Error")
+                    .kind(MessageDialogKind::Error)
+                    .blocking_show();
+                }
               }
             });
           } else if event.id == autostart_id {

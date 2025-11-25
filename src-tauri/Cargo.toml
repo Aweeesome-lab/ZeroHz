@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "0.1.15"
+version = "0.1.17"
 description = "A Tauri App"
 authors = ["you"]
 license = ""
@@ -25,6 +25,7 @@ tauri = { version = "2.9.2", features = ["macos-private-api", "tray-icon"] }
 tauri-plugin-autostart = "2"
 tauri-plugin-updater = "2"
 tauri-plugin-log = "2"
+tauri-plugin-dialog = "2"
 window-vibrancy = "0.7.1"
 image = { version = "0.25", default-features = false, features = ["png"] }
 

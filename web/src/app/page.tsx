@@ -147,6 +147,13 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
+              version="v0.1.17"
+              date="November 25, 2025"
+              changes={[
+                "Added visual feedback for 'Check for Updates' feature",
+              ]}
+            />
+            <ReleaseItem
               version="v0.1.16"
               date="November 25, 2025"
               changes={[
