@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { useAudioPlayer, useWindowResize, useElapsedTime } from "@/hooks";
+import {
+  useAudioPlayer,
+  useWindowResize,
+  useElapsedTime,
+  usePlaybackTracking,
+} from "@/hooks";
 import { SOUNDS, ITEMS_PER_SLIDE } from "@/constants/sounds";
 import { CompactView } from "./CompactView";
 import { ExpandedView } from "./ExpandedView";
@@ -25,6 +30,9 @@ export function FloatingBar() {
   const { isCompact, isResizing, handleToggleCompact } = useWindowResize();
 
   const { formattedTime } = useElapsedTime(activeSounds.size > 0, isPlaying);
+
+  // North Star Metric: Track playback time
+  usePlaybackTracking(isPlaying, activeSounds);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % totalSlides);
