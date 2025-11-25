@@ -1,6 +1,6 @@
 "use client";
 
-import FloatingBar from "@/components/FloatingBar";
+import { FloatingBar } from "@/components/floating-bar";
 
 export default function Home() {
   return (
