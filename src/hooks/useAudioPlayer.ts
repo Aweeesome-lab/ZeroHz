@@ -45,8 +45,12 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
     flight: null,
     train: null,
     night: null,
+    keyboard: null,
+    thunder: null,
   });
-  const sourceNodesRef = useRef<Record<SoundType, AudioBufferSourceNode | null>>({
+  const sourceNodesRef = useRef<
+    Record<SoundType, AudioBufferSourceNode | null>
+  >({
     rain: null,
     wind: null,
     waves: null,
@@ -56,6 +60,8 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
     flight: null,
     train: null,
     night: null,
+    keyboard: null,
+    thunder: null,
   });
   const audioBuffersRef = useRef<Record<SoundType, AudioBuffer | null>>({
     rain: null,
@@ -67,6 +73,8 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
     flight: null,
     train: null,
     night: null,
+    keyboard: null,
+    thunder: null,
   });
 
   // Keep track of active sounds in a ref for async access

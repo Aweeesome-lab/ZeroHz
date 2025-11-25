@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.16] - 2025-11-25
+
+### Added
+
+- **New Sounds**: Added `Keyboard` and `Thunder` sounds (user-provided high-quality audio).
+- **UI Update**: Increased items per slide in the sound menu to 4.
+
+### Removed
+
+- **Coffee Shop**: Removed `Coffee Shop` sound as per user request.
+
 ## [0.1.15] - 2025-11-24
 
 ### Fixed

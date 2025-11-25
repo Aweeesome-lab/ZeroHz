@@ -7,7 +7,9 @@ export type SoundType =
   | "fire"
   | "flight"
   | "train"
-  | "night";
+  | "night"
+  | "keyboard"
+  | "thunder";
 
 export interface SoundControl {
   id: SoundType;

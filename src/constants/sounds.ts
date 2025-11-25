@@ -8,6 +8,8 @@ import {
   Plane,
   TrainFront,
   Moon,
+  Keyboard,
+  CloudLightning,
 } from "lucide-react";
 import type { SoundControl, SoundType, SoundVolumes } from "@/types/audio";
 
@@ -24,6 +26,19 @@ export const SOUNDS: SoundControl[] = [
   { id: "flight", icon: Plane, label: "Flight", src: "/sounds/flight.m4a" },
   { id: "train", icon: TrainFront, label: "Train", src: "/sounds/train.m4a" },
   { id: "night", icon: Moon, label: "Night", src: "/sounds/night.m4a" },
+  // Work
+  {
+    id: "keyboard",
+    icon: Keyboard,
+    label: "Keyboard",
+    src: "/sounds/keyboard.m4a",
+  },
+  {
+    id: "thunder",
+    icon: CloudLightning,
+    label: "Thunder",
+    src: "/sounds/thunder.m4a",
+  },
 ];
 
 export const SOUND_IDS: SoundType[] = [
@@ -36,6 +51,8 @@ export const SOUND_IDS: SoundType[] = [
   "flight",
   "train",
   "night",
+  "keyboard",
+  "thunder",
 ];
 
 export const DEFAULT_VOLUMES: SoundVolumes = {
@@ -48,6 +65,8 @@ export const DEFAULT_VOLUMES: SoundVolumes = {
   flight: 0.5,
   train: 0.5,
   night: 0.5,
+  keyboard: 0.5,
+  thunder: 0.5,
 };
 
-export const ITEMS_PER_SLIDE = 3;
+export const ITEMS_PER_SLIDE = 4;
