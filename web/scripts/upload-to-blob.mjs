@@ -46,6 +46,10 @@ async function upload() {
     });
 
     console.log(`Uploaded to: ${blob.url}`);
+
+    // Write URL to file for GitHub Actions to read
+    fs.writeFileSync("blob-url.txt", blob.url);
+    console.log("URL written to blob-url.txt");
   } catch (error) {
     console.error("Error uploading to Vercel Blob:", error);
     process.exit(1);

@@ -50,6 +50,8 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "v__VERSION__"
@@ -67,21 +69,41 @@ jobs:
           # Find the built asset based on platform
           if [[ "${{ matrix.platform }}" == "macos-latest" ]]; then
             ASSET_PATH=$(find src-tauri/target/universal-apple-darwin/release/bundle/dmg -name "*.dmg" | head -n 1)
+            SIG_PATH="${ASSET_PATH}.sig"
           else
             ASSET_PATH=$(find src-tauri/target/release/bundle/nsis -name "*.exe" | head -n 1)
+            SIG_PATH="${ASSET_PATH}.sig"
           fi
 
           if [ -n "$ASSET_PATH" ]; then
             echo "Found asset: $ASSET_PATH"
-            # Install dependencies in web folder if not already (it was installed in previous step but let's be safe or reuse)
-            # We need to run the script using node from web directory context or just require the module
-            # Simplest way: use the installed @vercel/blob in web/node_modules
             
+            # Upload asset to Vercel Blob
+            # This script writes the URL to blob-url.txt
             node web/scripts/upload-to-blob.mjs "$ASSET_PATH"
+            
+            # Prepare data for next job
+            mkdir -p updater_data
+            cp blob-url.txt updater_data/url.txt
+            
+            if [ -f "$SIG_PATH" ]; then
+              echo "Found signature: $SIG_PATH"
+              cp "$SIG_PATH" updater_data/signature.txt
+            else
+              echo "Signature file not found at $SIG_PATH"
+              exit 1
+            fi
+            
           else
             echo "No asset found to upload"
             exit 1
           fi
+
+      - name: Upload Updater Data Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: updater-data-${{ matrix.platform }}
+          path: updater_data/
 
       - name: Send Webhook Notification
         if: success()
@@ -105,53 +127,78 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create latest.json for updater
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: cd web && npm install
+
+      - name: Download Updater Data
+        uses: actions/download-artifact@v4
+        with:
+          pattern: updater-data-*
+          path: updater_data
+          merge-multiple: false
+
+      - name: Create and Upload latest.json
         env:
+          ZEROHZ_READ_WRITE_TOKEN: ${{ secrets.ZEROHZ_READ_WRITE_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Get release info
+          # Read data from artifacts
+          # Structure: updater_data/updater-data-macos-latest/url.txt
+          
+          DMG_URL=$(cat updater_data/updater-data-macos-latest/url.txt)
+          DMG_SIG=$(cat updater_data/updater-data-macos-latest/signature.txt)
+          
+          EXE_URL=$(cat updater_data/updater-data-windows-latest/url.txt)
+          EXE_SIG=$(cat updater_data/updater-data-windows-latest/signature.txt)
+          
+          # Get release notes
           RELEASE_DATA=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
             "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.ref_name }}")
           
-          VERSION=$(echo "$RELEASE_DATA" | jq -r '.tag_name')
           NOTES=$(echo "$RELEASE_DATA" | jq -r '.body')
           PUBDATE=$(echo "$RELEASE_DATA" | jq -r '.published_at')
-          
-          # Find signature files from assets
-          DMG_SIG=$(echo "$RELEASE_DATA" | jq -r '.assets[] | select(.name | endswith(".dmg.sig")) | .browser_download_url')
-          EXE_SIG=$(echo "$RELEASE_DATA" | jq -r '.assets[] | select(.name | endswith(".nsis.zip.sig")) | .browser_download_url')
-          
-          # Find installer files
-          DMG_URL=$(echo "$RELEASE_DATA" | jq -r '.assets[] | select(.name | endswith(".dmg")) | .browser_download_url')
-          EXE_URL=$(echo "$RELEASE_DATA" | jq -r '.assets[] | select(.name | endswith("x64-setup.exe")) | .browser_download_url')
-          
-          # Download signatures
-          DMG_SIG_CONTENT=$(curl -sL "$DMG_SIG")
-          EXE_SIG_CONTENT=$(curl -sL "$EXE_SIG")
-          
+          VERSION="${{ github.ref_name }}"
+          # Remove 'v' prefix if present for version field, though Tauri usually handles it. 
+          # Let's keep it as is or strip it depending on tauri.conf.json. 
+          # Usually tauri.conf.json has 0.1.18, tag is v0.1.18. 
+          # The updater response version should match the app version.
+          CLEAN_VERSION=${VERSION#v}
+
           # Create latest.json
-          cat > latest.json << EOF
-          {
-            "version": "$VERSION",
-            "notes": "$NOTES",
-            "pub_date": "$PUBDATE",
-            "platforms": {
-              "darwin-universal": {
-                "signature": "$DMG_SIG_CONTENT",
-                "url": "$DMG_URL"
-              },
-              "windows-x86_64": {
-                "signature": "$EXE_SIG_CONTENT",
-                "url": "$EXE_URL"
-              }
-            }
-          }
-          EOF
+          # Note: JSON content must be properly escaped if notes contain special chars.
+          # Using jq to construct JSON is safer.
           
-          # Upload to release
-          RELEASE_ID=$(echo "$RELEASE_DATA" | jq -r '.id')
-          curl -X POST \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Content-Type: application/json" \
-            --data-binary @latest.json \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/${RELEASE_ID}/assets?name=latest.json"
+          jq -n \
+            --arg version "$CLEAN_VERSION" \
+            --arg notes "$NOTES" \
+            --arg pub_date "$PUBDATE" \
+            --arg dmg_url "$DMG_URL" \
+            --arg dmg_sig "$DMG_SIG" \
+            --arg exe_url "$EXE_URL" \
+            --arg exe_sig "$EXE_SIG" \
+            '{
+              version: $version,
+              notes: $notes,
+              pub_date: $pub_date,
+              platforms: {
+                "darwin-universal": {
+                  signature: $dmg_sig,
+                  url: $dmg_url
+                },
+                "windows-x86_64": {
+                  signature: $exe_sig,
+                  url: $exe_url
+                }
+              }
+            }' > latest.json
+            
+          echo "Generated latest.json:"
+          cat latest.json
+          
+          # Upload latest.json to Vercel Blob
+          node web/scripts/upload-to-blob.mjs "latest.json"
