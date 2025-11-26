@@ -3,5 +3,14 @@
   "identifier": "default",
   "description": "enables the default permissions",
   "windows": ["main"],
-  "permissions": ["core:default", "posthog:default"]
+  "permissions": [
+    "core:default",
+    "posthog:default",
+    "posthog:allow-capture",
+    "posthog:allow-identify",
+    "posthog:allow-get-config",
+    "posthog:allow-get-distinct-id",
+    "posthog:allow-reset",
+    "posthog:allow-alias"
+  ]
 }
