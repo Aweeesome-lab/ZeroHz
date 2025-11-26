@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.27] - 2025-11-26
+
+### Fixed
+
+- Version synchronization fix.
+
 ## [0.1.26] - 2025-11-26
 
 ### Fixed
