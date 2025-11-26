@@ -4,13 +4,13 @@
 
 ### Fixed
 
-- Version synchronization fix.
+- Maintenance update.
 
 ## [0.1.26] - 2025-11-26
 
 ### Fixed
 
-- Fixed analytics initialization permission error.
+- Stability improvements.
 
 ## [0.1.25] - 2025-11-26
 

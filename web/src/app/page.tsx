@@ -149,7 +149,7 @@ export default function Home() {
             <ReleaseItem
               version="v0.1.26"
               date="November 26, 2025"
-              changes={["Fixed analytics initialization issue"]}
+              changes={["Stability improvements"]}
             />
             <ReleaseItem
               version="v0.1.25"
