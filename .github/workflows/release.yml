@@ -39,6 +39,7 @@ jobs:
           cd web && npm install
 
       - name: Check Secrets
+        shell: bash
         env:
           PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
         run: |
