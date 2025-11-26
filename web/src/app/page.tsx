@@ -147,6 +147,11 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
+              version="v0.1.26"
+              date="November 26, 2025"
+              changes={["Fixed analytics initialization issue"]}
+            />
+            <ReleaseItem
               version="v0.1.25"
               date="November 26, 2025"
               changes={["General improvements and bug fixes"]}

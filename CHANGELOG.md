@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.26] - 2025-11-26
+
+### Fixed
+
+- Fixed analytics initialization permission error.
+
 ## [0.1.25] - 2025-11-26
 
 ### Improved
