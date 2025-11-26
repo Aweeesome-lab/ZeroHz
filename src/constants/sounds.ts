@@ -10,6 +10,7 @@ import {
   Moon,
   Keyboard,
   CloudLightning,
+  Utensils,
 } from "lucide-react";
 import type { SoundControl, SoundType, SoundVolumes } from "@/types/audio";
 
@@ -39,6 +40,12 @@ export const SOUNDS: SoundControl[] = [
     label: "Thunder",
     src: "/sounds/thunder.m4a",
   },
+  {
+    id: "glass-fruit",
+    icon: Utensils,
+    label: "Glass Fruit",
+    src: "/sounds/glass-fruit.m4a",
+  },
 ];
 
 export const SOUND_IDS: SoundType[] = [
@@ -53,6 +60,7 @@ export const SOUND_IDS: SoundType[] = [
   "night",
   "keyboard",
   "thunder",
+  "glass-fruit",
 ];
 
 export const DEFAULT_VOLUMES: SoundVolumes = {
@@ -67,6 +75,7 @@ export const DEFAULT_VOLUMES: SoundVolumes = {
   night: 0.5,
   keyboard: 0.5,
   thunder: 0.5,
+  "glass-fruit": 0.5,
 };
 
 export const ITEMS_PER_SLIDE = 4;
