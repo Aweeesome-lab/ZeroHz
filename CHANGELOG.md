@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.24] - 2025-11-26
+
+### Added
+
+- **New Sound**: Added `Glass Fruit` sound.
+- **Analytics**: Improved analytics debugging for better stability.
+
 ## [0.1.16] - 2025-11-25
 
 ### Added
