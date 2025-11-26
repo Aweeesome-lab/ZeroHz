@@ -15,7 +15,7 @@
         "label": "main",
         "title": "White Noise",
         "width": 650,
-        "height": 100,
+        "height": 120,
         "resizable": true,
         "fullscreen": false,
         "decorations": false,

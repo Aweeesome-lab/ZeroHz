@@ -48,7 +48,7 @@ export function SoundButton({
       {/* Volume Slider (Visible on hover/active) */}
       <div
         className={cn(
-          "absolute -bottom-8 left-1/2 -translate-x-1/2 w-16 transition-all duration-200 origin-top z-50",
+          "absolute -bottom-8 left-1/2 -translate-x-1/2 w-16 transition-all duration-200 origin-top z-50 p-1.5 rounded-full bg-[#1A1A1A]/95 border border-white/20 flex items-center justify-center",
           isActive
             ? "opacity-0 group-hover:opacity-100 scale-100"
             : "opacity-0 scale-95 pointer-events-none"
