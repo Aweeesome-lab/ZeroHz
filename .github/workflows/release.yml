@@ -38,6 +38,17 @@ jobs:
           npm install
           cd web && npm install
 
+      - name: Check Secrets
+        env:
+          PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+        run: |
+          if [ -z "$PRIVATE_KEY" ]; then
+            echo "::error::TAURI_PRIVATE_KEY is empty or missing!"
+            exit 1
+          else
+            echo "TAURI_PRIVATE_KEY is present (length: ${#PRIVATE_KEY})"
+          fi
+
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
         env:
@@ -91,6 +102,8 @@ jobs:
               cp "$SIG_PATH" updater_data/signature.txt
             else
               echo "Signature file not found at $SIG_PATH"
+              echo "Listing directory contents for debugging:"
+              find src-tauri/target/release/bundle -maxdepth 3
               exit 1
             fi
             
