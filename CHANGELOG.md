@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.25] - 2025-11-26
+
+### Improved
+
+- General improvements and bug fixes.
+
 ## [0.1.24] - 2025-11-26
 
 ### Added

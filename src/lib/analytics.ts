@@ -10,6 +10,17 @@
  */
 
 import posthog from "posthog-js";
+import { PostHog as TauriPostHog } from "tauri-plugin-posthog-api";
+
+interface TauriWindow extends Window {
+  __TAURI_INTERNALS__?: unknown;
+  __TAURI__?: unknown;
+}
+
+const isTauri =
+  typeof window !== "undefined" &&
+  ("__TAURI_INTERNALS__" in (window as unknown as TauriWindow) ||
+    "__TAURI__" in (window as unknown as TauriWindow));
 
 // ============================================================================
 // Event Names (상수)
@@ -64,58 +75,104 @@ export const analytics = {
   /**
    * 재생 세션 시작
    */
-  playbackSessionStart: (props: PlaybackSessionStartProps) => {
-    posthog.capture(EVENTS.PLAYBACK_SESSION_START, {
+  playbackSessionStart: async (props: PlaybackSessionStartProps) => {
+    if (
+      process.env.NODE_ENV === "development" ||
+      typeof window !== "undefined"
+    ) {
+      console.log("[Analytics] playbackSessionStart", props);
+    }
+
+    const properties = {
       active_sounds: props.activeSounds,
       sound_count: props.soundCount,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    if (isTauri) {
+      await TauriPostHog.capture(EVENTS.PLAYBACK_SESSION_START, properties);
+    } else {
+      posthog.capture(EVENTS.PLAYBACK_SESSION_START, properties);
+    }
   },
 
   /**
    * 재생 세션 종료 (북극성 지표)
    */
-  playbackSessionEnd: (
+  playbackSessionEnd: async (
     props: PlaybackSessionEndProps,
     options?: { transport?: "sendBeacon" }
   ) => {
-    posthog.capture(
-      EVENTS.PLAYBACK_SESSION_END,
-      {
-        session_duration_seconds: props.sessionDurationSeconds,
-        total_playback_seconds: props.totalPlaybackSeconds,
-        active_sounds: props.activeSounds,
-        sound_count: props.soundCount,
-        reason: props.reason,
-        timestamp: new Date().toISOString(),
-      },
-      options
-    );
+    if (
+      process.env.NODE_ENV === "development" ||
+      typeof window !== "undefined"
+    ) {
+      console.log("[Analytics] playbackSessionEnd", props);
+    }
+
+    const properties = {
+      session_duration_seconds: props.sessionDurationSeconds,
+      total_playback_seconds: props.totalPlaybackSeconds,
+      active_sounds: props.activeSounds,
+      sound_count: props.soundCount,
+      reason: props.reason,
+      timestamp: new Date().toISOString(),
+    };
+
+    if (isTauri) {
+      await TauriPostHog.capture(EVENTS.PLAYBACK_SESSION_END, properties);
+    } else {
+      posthog.capture(EVENTS.PLAYBACK_SESSION_END, properties, options);
+    }
   },
 
   /**
    * 재생 중 1분마다 heartbeat
    */
-  playbackHeartbeat: (props: PlaybackHeartbeatProps) => {
-    posthog.capture(EVENTS.PLAYBACK_HEARTBEAT, {
+  playbackHeartbeat: async (props: PlaybackHeartbeatProps) => {
+    // Heartbeat is frequent, maybe log only in dev or verbose
+    if (process.env.NODE_ENV === "development") {
+      console.log("[Analytics] playbackHeartbeat", props);
+    }
+
+    const properties = {
       session_duration_seconds: props.sessionDurationSeconds,
       total_playback_seconds: props.totalPlaybackSeconds,
       active_sounds: props.activeSounds,
       sound_count: props.soundCount,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    if (isTauri) {
+      await TauriPostHog.capture(EVENTS.PLAYBACK_HEARTBEAT, properties);
+    } else {
+      posthog.capture(EVENTS.PLAYBACK_HEARTBEAT, properties);
+    }
   },
 
   /**
    * 개별 사운드 on/off
    */
-  soundToggled: (props: SoundToggledProps) => {
-    posthog.capture(EVENTS.SOUND_TOGGLED, {
+  soundToggled: async (props: SoundToggledProps) => {
+    if (
+      process.env.NODE_ENV === "development" ||
+      typeof window !== "undefined"
+    ) {
+      console.log("[Analytics] soundToggled", props);
+    }
+
+    const properties = {
       sound_id: props.soundId,
       action: props.action,
       all_active_sounds: props.allActiveSounds,
       sound_count: props.soundCount,
-    });
+    };
+
+    if (isTauri) {
+      await TauriPostHog.capture(EVENTS.SOUND_TOGGLED, properties);
+    } else {
+      posthog.capture(EVENTS.SOUND_TOGGLED, properties);
+    }
   },
 };
 

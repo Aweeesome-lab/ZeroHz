@@ -15,6 +15,13 @@ pub fn run() {
     ))
     .plugin(tauri_plugin_updater::Builder::new().build())
     .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_posthog::init(
+      tauri_plugin_posthog::PostHogConfig {
+          api_key: option_env!("NEXT_PUBLIC_POSTHOG_KEY").unwrap_or("").to_string(),
+          api_host: option_env!("NEXT_PUBLIC_POSTHOG_HOST").unwrap_or("https://app.posthog.com").to_string(),
+          options: None,
+      }
+    ))
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();
 

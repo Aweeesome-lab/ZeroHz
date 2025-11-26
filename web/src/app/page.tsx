@@ -147,42 +147,24 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
+              version="v0.1.25"
+              date="November 26, 2025"
+              changes={["General improvements and bug fixes"]}
+            />
+            <ReleaseItem
               version="v0.1.24"
               date="November 26, 2025"
-              changes={[
-                "Added new sound: Glass Fruit",
-                "Improved analytics debugging for better stability",
-              ]}
-            />
-            <ReleaseItem
-              version="v0.1.18"
-              date="November 25, 2025"
-              changes={[
-                "Fixed auto-update functionality - updates now work correctly",
-                "Improved deployment notifications with platform info",
-              ]}
-            />
-            <ReleaseItem
-              version="v0.1.17"
-              date="November 25, 2025"
-              changes={[
-                "Added visual feedback for 'Check for Updates' feature",
-              ]}
+              changes={["Added new sound: Glass Fruit"]}
             />
             <ReleaseItem
               version="v0.1.16"
               date="November 25, 2025"
-              changes={[
-                "Sound menu now displays 4 icons per slide",
-                "Added 2 new sounds: Keyboard and Thunder",
-              ]}
+              changes={["Added 2 new sounds: Keyboard and Thunder"]}
             />
             <ReleaseItem
               version="v0.1.15"
               date="November 24, 2025"
               changes={[
-                "Fixed sound playback issues on macOS",
-                "Improved audio compatibility",
                 "Added 5 new sounds: Forest, Stream, Flight, Train, Night",
               ]}
             />
@@ -193,8 +175,6 @@ export default function Home() {
                 "Initial release",
                 "Basic white noise player functionality",
                 "Included 4 ambient sounds: Rain, Wind, Waves, and Fire",
-                "Expand/Collapse mode support",
-                "Time tracking functionality",
               ]}
             />
           </div>
