@@ -25,7 +25,8 @@
     "stats": {
       "total": "총 세션",
       "completionRate": "완료율",
-      "focusTime": "총 집중 시간"
+      "focusTime": "총 집중 시간",
+      "todayFocusTime": "오늘 집중 시간"
     },
     "chart": {
       "week": "최근 7일"
@@ -43,7 +44,8 @@
     "soundCount": "개 사운드",
     "time": {
       "hours": "시간",
-      "minutes": "분"
+      "minutes": "분",
+      "seconds": "초"
     }
   },
   "timerControl": {

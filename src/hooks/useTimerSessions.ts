@@ -173,7 +173,7 @@ export function useTimerSessions(): UseTimerSessionsReturn {
   const stats = useMemo<SessionStats>(() => {
     const completedSessions = sessions.filter((s) => s.completed);
     const todaySessions = sessions.filter((s) => isToday(s.startedAt));
-    const totalFocusTime = completedSessions.reduce(
+    const totalFocusTime = sessions.reduce(
       (sum, s) => sum + s.actualSeconds,
       0
     );

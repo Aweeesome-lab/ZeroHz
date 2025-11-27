@@ -25,7 +25,8 @@
     "stats": {
       "total": "Total Sessions",
       "completionRate": "Completion Rate",
-      "focusTime": "Total Focus Time"
+      "focusTime": "Total Focus Time",
+      "todayFocusTime": "Today"
     },
     "chart": {
       "week": "Last 7 Days"
@@ -43,7 +44,8 @@
     "soundCount": "sounds",
     "time": {
       "hours": "h",
-      "minutes": "m"
+      "minutes": "m",
+      "seconds": "s"
     }
   },
   "timerControl": {

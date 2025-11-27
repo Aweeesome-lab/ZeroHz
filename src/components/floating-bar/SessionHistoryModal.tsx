@@ -30,18 +30,22 @@ function formatTime(seconds: number): string {
 }
 
 /**
- * 시간을 "X시간 Y분" 형식으로 변환
+ * 시간을 "X시간 Y분 Z초" 형식으로 변환
  */
 function formatDuration(seconds: number, t: (key: string) => string): string {
   const hours = Math.floor(seconds / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
 
   if (hours > 0) {
     return `${hours}${t("sessionHistory.time.hours")} ${mins}${t(
       "sessionHistory.time.minutes"
-    )}`;
+    )} ${secs}${t("sessionHistory.time.seconds")}`;
   }
-  return `${mins}${t("sessionHistory.time.minutes")}`;
+  if (mins > 0) {
+    return `${mins}${t("sessionHistory.time.minutes")} ${secs}${t("sessionHistory.time.seconds")}`;
+  }
+  return `${secs}${t("sessionHistory.time.seconds")}`;
 }
 
 /**
@@ -254,28 +258,18 @@ export function SessionHistoryModal({
         <div className="grid grid-cols-2 gap-2 mb-4">
           <div className="bg-white/5 rounded-lg p-3 border border-white/5">
             <div className="text-white/40 text-xs mb-1">
-              {t("sessionHistory.stats.total")}
+              {t("sessionHistory.stats.todayFocusTime")}({stats.todaySessions.length})
             </div>
             <div className="text-white text-lg font-bold">
-              {stats.totalSessions}
+              {formatDuration(
+                stats.todaySessions.reduce((sum, s) => sum + s.actualSeconds, 0),
+                t
+              )}
             </div>
           </div>
           <div className="bg-white/5 rounded-lg p-3 border border-white/5">
             <div className="text-white/40 text-xs mb-1">
-              {t("sessionHistory.stats.completionRate")}
-            </div>
-            <div className="text-white text-lg font-bold">
-              {stats.totalSessions > 0
-                ? Math.round(
-                    (stats.completedSessions / stats.totalSessions) * 100
-                  )
-                : 0}
-              %
-            </div>
-          </div>
-          <div className="bg-white/5 rounded-lg p-3 border border-white/5 col-span-2">
-            <div className="text-white/40 text-xs mb-1">
-              {t("sessionHistory.stats.focusTime")}
+              {t("sessionHistory.stats.focusTime")}({stats.totalSessions})
             </div>
             <div className="text-white text-lg font-bold">
               {formatDuration(stats.totalFocusTime, t)}
