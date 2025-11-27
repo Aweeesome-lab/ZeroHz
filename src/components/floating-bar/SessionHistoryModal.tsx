@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { X, Trash2, Clock, CheckCircle, XCircle, Calendar } from "lucide-react";
+import { X, Trash2, Clock, CheckCircle, XCircle, Calendar, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TimerSession, SessionStats } from "@/types/timer";
 import { TIMER_PRESETS } from "@/constants/timer";
@@ -149,6 +149,7 @@ export function SessionHistoryModal({
   const originalSizeRef = useRef<{ width: number; height: number } | null>(
     null
   );
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // 날짜별로 세션 그룹핑
   const groupedSessions = useMemo(() => {
@@ -356,16 +357,48 @@ export function SessionHistoryModal({
       {sessions.length > 0 && (
         <div className="p-4 border-t border-white/10">
           <button
-            onClick={() => {
-              if (window.confirm(t("sessionHistory.delete.confirm"))) {
-                onClear();
-              }
-            }}
+            onClick={() => setShowDeleteConfirm(true)}
             className="w-full flex items-center justify-center gap-2 text-red-400/70 text-xs hover:text-red-400 py-2 rounded-lg hover:bg-red-500/10 transition-all"
           >
             <Trash2 size={12} />
             {t("sessionHistory.delete.button")}
           </button>
+        </div>
+      )}
+
+      {/* 삭제 확인 다이얼로그 */}
+      {showDeleteConfirm && (
+        <div className="absolute inset-0 z-60 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#252525] rounded-xl p-5 mx-4 border border-white/10 shadow-2xl max-w-[280px] w-full">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 rounded-full bg-red-500/20">
+                <AlertTriangle size={18} className="text-red-400" />
+              </div>
+              <h3 className="text-white text-sm font-semibold">
+                {t("sessionHistory.delete.confirmTitle")}
+              </h3>
+            </div>
+            <p className="text-white/60 text-xs mb-4 leading-relaxed">
+              {t("sessionHistory.delete.confirm")}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-3 py-2 text-xs text-white/70 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-all"
+              >
+                {t("common.cancel")}
+              </button>
+              <button
+                onClick={() => {
+                  onClear();
+                  setShowDeleteConfirm(false);
+                }}
+                className="flex-1 px-3 py-2 text-xs text-white bg-red-500/80 hover:bg-red-500 rounded-lg transition-all"
+              >
+                {t("sessionHistory.delete.button")}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

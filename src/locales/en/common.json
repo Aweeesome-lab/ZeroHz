@@ -36,7 +36,8 @@
       "yesterday": "Yesterday"
     },
     "delete": {
-      "confirm": "Are you sure you want to delete all session history?",
+      "confirmTitle": "Delete History",
+      "confirm": "All session history will be permanently deleted. This action cannot be undone.",
       "button": "Clear All History"
     },
     "soundCount": "sounds",
@@ -77,6 +78,7 @@
   },
   "common": {
     "countdown": "Countdown",
-    "stopwatch": "Stopwatch"
+    "stopwatch": "Stopwatch",
+    "cancel": "Cancel"
   }
 }
