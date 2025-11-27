@@ -38,11 +38,35 @@ jobs:
           npm install
           cd web && npm install
 
-      - name: Create .env file
+      - name: Create .env.local file for Next.js build
+        shell: bash
         run: |
-          echo "NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}" >> .env
-          echo "NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}" >> .env
+          # Create .env.local for Next.js (takes precedence over .env)
+          echo "NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}" > .env.local
+          echo "NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}" >> .env.local
 
+          # Verify the file was created correctly
+          echo "Created .env.local with PostHog configuration:"
+          cat .env.local | sed 's/=.*/=***/' # Show keys but hide values
+
+      - name: Verify PostHog secrets are set
+        shell: bash
+        env:
+          POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+          POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+        run: |
+          if [ -z "$POSTHOG_KEY" ]; then
+            echo "::error::NEXT_PUBLIC_POSTHOG_KEY secret is empty or missing!"
+            exit 1
+          else
+            echo "✓ NEXT_PUBLIC_POSTHOG_KEY is present (length: ${#POSTHOG_KEY})"
+          fi
+
+          if [ -z "$POSTHOG_HOST" ]; then
+            echo "::warning::NEXT_PUBLIC_POSTHOG_HOST is empty, will use default"
+          else
+            echo "✓ NEXT_PUBLIC_POSTHOG_HOST is present: $POSTHOG_HOST"
+          fi
 
       - name: Check Secrets
         shell: bash
@@ -84,6 +108,25 @@ jobs:
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || '' }}
+
+      - name: Verify PostHog key is embedded in build
+        shell: bash
+        env:
+          POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+        run: |
+          echo "Checking if PostHog key is embedded in the built JavaScript..."
+          # Extract first 10 chars of key for safe searching (avoid exposing full key in logs)
+          KEY_PREFIX="${POSTHOG_KEY:0:10}"
+
+          # Search in the built output directory
+          if grep -r "$KEY_PREFIX" out/ > /dev/null 2>&1; then
+            echo "✓ PostHog key found in built output - analytics will work!"
+          else
+            echo "::error::PostHog key NOT found in built output!"
+            echo "This means environment variables were not properly injected during Next.js build."
+            echo "Check that .env.local was created before 'npm run build' was executed."
+            exit 1
+          fi
 
       - name: Debug - Check build output
         shell: bash

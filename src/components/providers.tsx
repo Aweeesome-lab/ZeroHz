@@ -34,6 +34,9 @@ if (typeof window !== "undefined") {
         api_host: host || "https://app.posthog.com",
         person_profiles: "identified_only",
         persistence: "localStorage", // Critical for Tauri/Desktop apps
+        autocapture: false, // Disable automatic click/input tracking - only custom events
+        capture_pageview: false, // Disable automatic pageviews
+        capture_pageleave: false, // Disable automatic page leave tracking
         debug: process.env.NODE_ENV === "development",
         loaded: (ph) => {
           if (process.env.NODE_ENV === "development") {

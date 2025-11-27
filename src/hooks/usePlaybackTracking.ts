@@ -44,11 +44,16 @@ export function usePlaybackTracking(
     sessionStartTimeRef.current = Date.now();
     isActiveRef.current = true;
 
+    const sounds = getActiveSoundNames();
+    if (process.env.NODE_ENV === "development") {
+      console.log("[usePlaybackTracking] Starting session with sounds:", sounds);
+    }
+
     analytics.playbackSessionStart({
-      activeSounds: getActiveSoundNames(),
-      soundCount: activeSounds.size,
+      activeSounds: sounds,
+      soundCount: sounds.length,
     });
-  }, [getActiveSoundNames, activeSounds.size]);
+  }, [getActiveSoundNames]);
 
   // End session
   const endSession = useCallback(() => {
@@ -59,16 +64,21 @@ export function usePlaybackTracking(
     );
     totalPlaybackTimeRef.current += sessionDuration;
 
+    const sounds = getActiveSoundNames();
+    if (process.env.NODE_ENV === "development") {
+      console.log("[usePlaybackTracking] Ending session, duration:", sessionDuration, "seconds");
+    }
+
     analytics.playbackSessionEnd({
       sessionDurationSeconds: sessionDuration,
       totalPlaybackSeconds: totalPlaybackTimeRef.current,
-      activeSounds: getActiveSoundNames(),
-      soundCount: activeSounds.size,
+      activeSounds: sounds,
+      soundCount: sounds.length,
     });
 
     sessionStartTimeRef.current = null;
     isActiveRef.current = false;
-  }, [getActiveSoundNames, activeSounds.size]);
+  }, [getActiveSoundNames]);
 
   // Handle playback state changes
   useEffect(() => {
@@ -90,16 +100,17 @@ export function usePlaybackTracking(
         (Date.now() - sessionStartTimeRef.current) / 1000
       );
 
+      const sounds = getActiveSoundNames();
       analytics.playbackHeartbeat({
         sessionDurationSeconds: sessionDuration,
         totalPlaybackSeconds: totalPlaybackTimeRef.current + sessionDuration,
-        activeSounds: getActiveSoundNames(),
-        soundCount: activeSounds.size,
+        activeSounds: sounds,
+        soundCount: sounds.length,
       });
     }, TRACKING_INTERVAL_SECONDS * 1000);
 
     return () => clearInterval(interval);
-  }, [isActivelyPlaying, getActiveSoundNames, activeSounds.size]);
+  }, [isActivelyPlaying, getActiveSoundNames]);
 
   // Track sound changes (when sounds are added/removed during playback)
   const prevActiveSoundsRef = useRef<Set<SoundType>>(new Set());
@@ -118,13 +129,15 @@ export function usePlaybackTracking(
     // Find removed sounds
     const removed = Array.from(prev).filter((s) => !current.has(s));
 
+    const sounds = getActiveSoundNames();
+
     // Send individual event per sound for easier PostHog breakdown analysis
     added.forEach((soundId) => {
       analytics.soundToggled({
         soundId,
         action: "on",
-        allActiveSounds: getActiveSoundNames(),
-        soundCount: activeSounds.size,
+        allActiveSounds: sounds,
+        soundCount: sounds.length,
       });
     });
 
@@ -132,8 +145,8 @@ export function usePlaybackTracking(
       analytics.soundToggled({
         soundId,
         action: "off",
-        allActiveSounds: getActiveSoundNames(),
-        soundCount: activeSounds.size,
+        allActiveSounds: sounds,
+        soundCount: sounds.length,
       });
     });
 

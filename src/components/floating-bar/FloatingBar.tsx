@@ -170,8 +170,9 @@ function FloatingBarContent() {
     addSession,
   ]);
 
-  // North Star Metric: Track playback time (타이머 실행 중일 때 추적)
-  usePlaybackTracking(timer.isRunning && !timer.isPaused, activeSounds);
+  // North Star Metric: Track playback time
+  // 소리가 활성화되어 있으면 추적 (타이머 유무와 관계없이)
+  usePlaybackTracking(activeSounds.size > 0, activeSounds);
 
   // 미완료 세션 기록 (리셋, 모드 전환 시 호출)
   const recordIncompleteSession = useCallback(() => {
