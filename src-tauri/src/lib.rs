@@ -95,22 +95,9 @@ pub fn run() {
       let autostart_manager = app.autolaunch();
       let is_enabled = autostart_manager.is_enabled().unwrap_or(false);
 
-      // Build menu items
-      let version_item = MenuItemBuilder::new(&version_text)
-        .enabled(false)
-        .build(app)?;
-      
-      let separator1 = PredefinedMenuItem::separator(app)?;
-      
-      let check_update_item = MenuItemBuilder::new("Check for Updates")
-        .build(app)?;
-      
-      let separator2 = PredefinedMenuItem::separator(app)?;
-      
-      let autostart_item = CheckMenuItemBuilder::new("Start at Login")
-        .checked(is_enabled)
-        .build(app)?;
-      
+      // Build menu items - organized by importance (Raycast style)
+
+      // === Primary Actions (Most Used) ===
       let show_window_item = CheckMenuItemBuilder::new("Show Window")
         .checked(true)
         .build(app)?;
@@ -118,17 +105,19 @@ pub fn run() {
       let session_history_item = MenuItemBuilder::new("Session History")
         .build(app)?;
 
-      let open_data_folder_item = MenuItemBuilder::new("Open Data Folder")
-        .build(app)?;
+      let separator1 = PredefinedMenuItem::separator(app)?;
 
-      let separator3 = PredefinedMenuItem::separator(app)?;
+      // === Settings ===
+      let autostart_item = CheckMenuItemBuilder::new("Start at Login")
+        .checked(is_enabled)
+        .build(app)?;
 
       // Language Submenu
       let lang_ko_item = CheckMenuItemBuilder::with_id("lang_ko", "한국어")
         .build(app)?;
       let lang_en_item = CheckMenuItemBuilder::with_id("lang_en", "English")
         .build(app)?;
-      
+
       app.manage(TrayMenuState {
         ko: lang_ko_item.clone(),
         en: lang_en_item.clone(),
@@ -138,6 +127,19 @@ pub fn run() {
         .items(&[&lang_ko_item, &lang_en_item])
         .build()?;
 
+      let separator2 = PredefinedMenuItem::separator(app)?;
+
+      // === App Info ===
+      let version_item = MenuItemBuilder::new(&version_text)
+        .enabled(false)
+        .build(app)?;
+
+      let check_update_item = MenuItemBuilder::new("Check for Updates")
+        .build(app)?;
+
+      let separator3 = PredefinedMenuItem::separator(app)?;
+
+      // === Exit ===
       let quit_item = MenuItemBuilder::new("Quit")
         .build(app)?;
 
@@ -146,27 +148,26 @@ pub fn run() {
       let autostart_id = autostart_item.id().clone();
       let show_window_id = show_window_item.id().clone();
       let session_history_id = session_history_item.id().clone();
-      let open_data_folder_id = open_data_folder_item.id().clone();
       let quit_id = quit_item.id().clone();
       let lang_ko_id = lang_ko_item.id().clone();
       let lang_en_id = lang_en_item.id().clone();
 
-      // Get app data dir for menu handler
-      let app_data_dir = app.path().app_data_dir().ok();
-
       let menu = Menu::with_items(
         app,
         &[
-          &version_item, 
-          &separator1, 
-          &check_update_item, 
-          &separator2, 
-          &autostart_item, 
-          &show_window_item, 
+          // Primary Actions
+          &show_window_item,
+          &session_history_item,
+          &separator1,
+          // Settings
+          &autostart_item,
           &language_submenu,
-          &session_history_item, 
-          &open_data_folder_item, 
-          &separator3, 
+          &separator2,
+          // App Info
+          &version_item,
+          &check_update_item,
+          &separator3,
+          // Exit
           &quit_item
         ],
       )?;
@@ -310,77 +311,6 @@ pub fn run() {
               let _ = window.show();
               let _ = window.set_focus();
               let _ = window.emit("open-session-history", ());
-            }
-          } else if event.id == open_data_folder_id {
-            // Open data folder in Finder
-            if let Some(ref path) = app_data_dir {
-              // Ensure the directory exists
-              if !path.exists() {
-                if let Err(e) = std::fs::create_dir_all(path) {
-                  println!("Failed to create data directory: {:?}", e);
-                  use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
-                  app.dialog()
-                    .message(format!("Failed to create data directory: {}", e))
-                    .title("Error")
-                    .kind(MessageDialogKind::Error)
-                    .blocking_show();
-                  return;
-                }
-              }
-
-              let path_str = path.to_string_lossy().to_string();
-              #[cfg(target_os = "macos")]
-              {
-                // Use -R flag to reveal in Finder (avoids .app extension being treated as application)
-                if let Err(e) = std::process::Command::new("open")
-                  .arg("-R")
-                  .arg(&path_str)
-                  .spawn() {
-                  println!("Failed to open data folder: {:?}", e);
-                  use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
-                  app.dialog()
-                    .message(format!("Failed to open data folder: {}", e))
-                    .title("Error")
-                    .kind(MessageDialogKind::Error)
-                    .blocking_show();
-                }
-              }
-              #[cfg(target_os = "windows")]
-              {
-                if let Err(e) = std::process::Command::new("explorer")
-                  .arg(&path_str)
-                  .spawn() {
-                  println!("Failed to open data folder: {:?}", e);
-                  use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
-                  app.dialog()
-                    .message(format!("Failed to open data folder: {}", e))
-                    .title("Error")
-                    .kind(MessageDialogKind::Error)
-                    .blocking_show();
-                }
-              }
-              #[cfg(target_os = "linux")]
-              {
-                if let Err(e) = std::process::Command::new("xdg-open")
-                  .arg(&path_str)
-                  .spawn() {
-                  println!("Failed to open data folder: {:?}", e);
-                  use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
-                  app.dialog()
-                    .message(format!("Failed to open data folder: {}", e))
-                    .title("Error")
-                    .kind(MessageDialogKind::Error)
-                    .blocking_show();
-                }
-              }
-            } else {
-              println!("Data directory path is not available");
-              use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
-              app.dialog()
-                .message("Data directory path is not available")
-                .title("Error")
-                .kind(MessageDialogKind::Error)
-                .blocking_show();
             }
           } else if event.id == lang_ko_id {
             let _ = app.emit("change-language", "ko");
