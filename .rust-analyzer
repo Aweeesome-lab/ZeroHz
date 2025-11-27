@@ -6,6 +6,7 @@
     ".next",
     "out",
     "web",
+    "src",
     "src-tauri/target",
     "src-tauri/gen",
     "**/generated",

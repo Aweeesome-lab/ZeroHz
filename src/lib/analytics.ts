@@ -25,28 +25,42 @@ const isTauri =
     "__TAURI__" in (window as unknown as TauriWindow));
 
 // Initialize PostHog for Tauri environment (web is initialized in providers.tsx)
+// Initialize PostHog for Tauri environment (web is initialized in providers.tsx)
 if (typeof window !== "undefined" && isTauri) {
   const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
   const host = process.env.NEXT_PUBLIC_POSTHOG_HOST;
 
   if (key) {
-    posthog.init(key, {
-      api_host: host || "https://app.posthog.com",
-      person_profiles: "identified_only",
-      persistence: "localStorage",
-      capture_pageview: false, // Disable automatic pageviews for desktop app
-      loaded: (ph) => {
-        console.log("[Analytics] PostHog initialized for Tauri. ID:", ph.get_distinct_id());
-      },
-    });
+    console.log("[Analytics] Initializing PostHog for Tauri...");
+    try {
+      posthog.init(key, {
+        api_host: host || "https://app.posthog.com",
+        person_profiles: "identified_only",
+        persistence: "localStorage",
+        capture_pageview: false, // Disable automatic pageviews for desktop app
+        loaded: (ph) => {
+          console.log(
+            "[Analytics] PostHog initialized for Tauri. ID:",
+            ph.get_distinct_id()
+          );
+        },
+      });
+    } catch (e) {
+      console.error("[Analytics] Failed to initialize PostHog:", e);
+    }
   } else {
-    console.warn("[Analytics] PostHog key not found for Tauri environment");
+    console.error(
+      "[Analytics] FATAL: NEXT_PUBLIC_POSTHOG_KEY not found for Tauri environment"
+    );
   }
 }
 
 // Debug: Log which analytics backend is being used
 if (typeof window !== "undefined") {
-  console.log("[Analytics] Environment:", isTauri ? "Tauri Desktop" : "Web Browser");
+  console.log(
+    "[Analytics] Environment:",
+    isTauri ? "Tauri Desktop" : "Web Browser"
+  );
 }
 
 // ============================================================================

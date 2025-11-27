@@ -38,6 +38,12 @@ jobs:
           npm install
           cd web && npm install
 
+      - name: Create .env file
+        run: |
+          echo "NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}" >> .env
+          echo "NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}" >> .env
+
+
       - name: Check Secrets
         shell: bash
         env:
