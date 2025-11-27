@@ -82,5 +82,36 @@
     "countdown": "Countdown",
     "stopwatch": "Stopwatch",
     "cancel": "Cancel"
+  },
+  "tray": {
+    "showWindow": "Show Window",
+    "sessionHistory": "Session History",
+    "startAtLogin": "Start at Login",
+    "activateLicense": "Activate License",
+    "proActivated": "Pro ✓",
+    "language": "Language",
+    "checkForUpdates": "Check for Updates",
+    "quit": "Quit"
+  },
+  "pro": {
+    "playtimeLimitTitle": "Free time limit reached",
+    "playtimeLimitDescription": "Upgrade to Pro for unlimited listening.",
+    "timerTrialTitle": "Enjoying the timer?",
+    "timerTrialDescription": "Upgrade to Pro for unlimited timer sessions.",
+    "featuresTitle": "Pro Features",
+    "featureUnlimitedPlaytime": "Unlimited playtime",
+    "featureUnlimitedTimer": "Unlimited timer",
+    "featureAnalytics": "Analytics (coming soon)",
+    "later": "Later",
+    "getPro": "Get Pro",
+    "remainingTime": "Time remaining today",
+    "trialRemaining": "{{count}} left",
+    "activateLicense": "Activate License",
+    "enterLicenseKey": "Enter license key",
+    "activate": "Activate",
+    "invalidLicense": "Invalid license key",
+    "activated": "Pro activated",
+    "haveLicense": "Already have a license key?",
+    "buyLicense": "Buy a license"
   }
 }

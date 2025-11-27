@@ -38,6 +38,8 @@
             "core:window:allow-current-monitor",
             "core:window:allow-outer-position",
             "core:default",
+            "autostart:default",
+            "opener:default",
             "log:default",
             "log:allow-log",
             "posthog:default",

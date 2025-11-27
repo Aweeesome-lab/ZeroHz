@@ -1,8 +1,20 @@
 import Link from "next/link";
-import { Download, Moon, Monitor, Mail, Zap } from "lucide-react";
+import {
+  Download,
+  Moon,
+  Monitor,
+  Mail,
+  Zap,
+  Check,
+  Sparkles,
+} from "lucide-react";
 import DemoPlayer from "../components/DemoPlayer";
 import DownloadButton from "../components/DownloadButton";
 import Image from "next/image";
+
+// LemonSqueezy 결제 링크
+const LEMONSQUEEZY_CHECKOUT_URL =
+  "https://zerohz-app.lemonsqueezy.com/buy/7f3f5f67-5a6c-4bec-8bb1-919aa1d735f3";
 
 export default function Home() {
   return (
@@ -29,6 +41,12 @@ export default function Home() {
               Features
             </Link>
             <Link
+              href="#pricing"
+              className="hover:text-black transition-colors"
+            >
+              Pricing
+            </Link>
+            <Link
               href="#support"
               className="hover:text-black transition-colors"
             >
@@ -39,7 +57,7 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <main className="pt-32 pb-20 px-6">
+      <main id="hero" className="pt-32 pb-20 px-6">
         <div className="container mx-auto max-w-5xl text-center space-y-8">
           <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-transparent bg-clip-text bg-linear-to-b from-black to-black/60 pb-2">
             Minimalist White Noise for Deep Focus.
@@ -139,8 +157,100 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Pricing */}
+      <section id="pricing" className="py-24 border-t border-black/5">
+        <div className="container mx-auto px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold mb-4">Pricing</h2>
+            <p className="text-black/60 max-w-xl mx-auto">
+              Start free, upgrade when you need more. One-time payment, lifetime
+              access.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Free Plan */}
+            <div className="p-8 rounded-2xl bg-white border border-black/10 shadow-sm">
+              <div className="mb-6">
+                <h3 className="text-xl font-bold mb-2">Free</h3>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-4xl font-bold">$0</span>
+                  <span className="text-black/40">forever</span>
+                </div>
+              </div>
+
+              <Link
+                href="#hero"
+                className="w-full py-3 bg-gray-100 text-black rounded-full font-semibold hover:bg-gray-200 transition-all flex items-center justify-center gap-2 mb-8"
+              >
+                <Download size={18} />
+                Download Free
+              </Link>
+
+              <ul className="space-y-3">
+                <PricingFeature>All ambient sounds</PricingFeature>
+                <PricingFeature>2 hours daily playtime</PricingFeature>
+                <PricingFeature>3 timer sessions trial</PricingFeature>
+                <PricingFeature>Menu bar integration</PricingFeature>
+              </ul>
+            </div>
+
+            {/* Pro Plan */}
+            <div className="p-8 rounded-2xl bg-[#111111] text-white border border-white/10 shadow-2xl relative overflow-hidden">
+              {/* Beta Discount Badge */}
+              <div className="absolute top-4 right-4 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                35% OFF
+              </div>
+              <div className="mb-6">
+                <h3 className="text-xl font-bold mb-2">Pro</h3>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold">$9.99</span>
+                  <span className="text-white/40 line-through text-lg">
+                    $12.99
+                  </span>
+                </div>
+                <p className="text-amber-400 text-sm mt-1 font-medium">
+                  Beta discount
+                </p>
+              </div>
+
+              <Link
+                href={LEMONSQUEEZY_CHECKOUT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-3 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-2 mb-8"
+              >
+                <Sparkles size={18} />
+                Get Pro License
+              </Link>
+
+              <ul className="space-y-3">
+                <PricingFeature highlighted>All ambient sounds</PricingFeature>
+                <PricingFeature highlighted>Unlimited playtime</PricingFeature>
+                <PricingFeature highlighted>
+                  Unlimited timer sessions
+                </PricingFeature>
+                <PricingFeature highlighted>
+                  Session history & stats
+                </PricingFeature>
+                <PricingFeature highlighted>Priority support</PricingFeature>
+                <PricingFeature highlighted>Lifetime updates</PricingFeature>
+              </ul>
+            </div>
+          </div>
+
+          <p className="text-center text-black/40 text-sm mt-8">
+            Already have a license? Enter it in the app via tray menu → Activate
+            License
+          </p>
+        </div>
+      </section>
+
       {/* Release Notes */}
-      <section id="release-notes" className="py-24 border-t border-black/5">
+      <section
+        id="release-notes"
+        className="py-24 border-t border-black/5 bg-gray-50"
+      >
         <div className="container mx-auto px-6 max-w-3xl">
           <h2 className="text-3xl font-bold mb-12 text-center">
             Release Notes
@@ -256,6 +366,26 @@ function FeatureCard({
       <h3 className="text-xl font-bold mb-3">{title}</h3>
       <p className="text-black/60 leading-relaxed">{description}</p>
     </div>
+  );
+}
+
+function PricingFeature({
+  children,
+  highlighted = false,
+}: {
+  children: React.ReactNode;
+  highlighted?: boolean;
+}) {
+  return (
+    <li className="flex items-center gap-2">
+      <Check
+        size={16}
+        className={highlighted ? "text-white" : "text-black/40"}
+      />
+      <span className={highlighted ? "text-white/90" : "text-black/60"}>
+        {children}
+      </span>
+    </li>
   );
 }
 

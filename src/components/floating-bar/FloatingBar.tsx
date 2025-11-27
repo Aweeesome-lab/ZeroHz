@@ -10,11 +10,14 @@ import {
   useTimerSessions,
   createSessionData,
   useAppSettings,
+  usePro,
 } from "@/hooks";
 import { SOUNDS, ITEMS_PER_SLIDE } from "@/constants/sounds";
 import { CompactView } from "./CompactView";
 import { ExpandedView } from "./ExpandedView";
 import { SessionHistoryModal } from "./SessionHistoryModal";
+import { ProUpgradeModal } from "./ProUpgradeModal";
+import { LicenseInputModal } from "./LicenseInputModal";
 import { trackEvent } from "@/lib/analytics";
 import {
   playTimerCompleteSound,
@@ -28,6 +31,11 @@ function FloatingBarContent() {
   const totalSlides = Math.ceil(SOUNDS.length / ITEMS_PER_SLIDE);
   const [currentPresetId, setCurrentPresetId] = useState<string | undefined>();
   const [showSessionHistory, setShowSessionHistory] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [showLicenseModal, setShowLicenseModal] = useState(false);
+
+  // Pro 상태 관리
+  const pro = usePro();
 
   // Load settings from persistent storage
   const settings = useAppSettings();
@@ -116,31 +124,45 @@ function FloatingBarContent() {
     currentPresetIdRef.current = currentPresetId;
   }, [currentPresetId]);
 
-  // Tauri 이벤트 리스너 (트레이 메뉴에서 세션 기록 열기)
+  // Tauri 이벤트 리스너 (트레이 메뉴에서 세션 기록/라이센스 열기)
   useEffect(() => {
-    let unlisten: (() => void) | undefined;
+    let unlistenSessionHistory: (() => void) | undefined;
+    let unlistenLicenseInput: (() => void) | undefined;
 
-    const setupListener = async () => {
+    const setupListeners = async () => {
       try {
         const { listen } = await import("@tauri-apps/api/event");
-        unlisten = await listen("open-session-history", () => {
+        unlistenSessionHistory = await listen("open-session-history", () => {
           setShowSessionHistory(true);
+        });
+        unlistenLicenseInput = await listen("open-license-input", () => {
+          setShowLicenseModal(true);
         });
       } catch {
         // 웹 환경에서는 무시
       }
     };
 
-    setupListener();
+    setupListeners();
 
     return () => {
-      unlisten?.();
+      unlistenSessionHistory?.();
+      unlistenLicenseInput?.();
     };
   }, []);
 
   // 타이머 완료 시 세션 기록 (카운트다운만 완료 가능)
+  // useRef로 중복 실행 방지
+  const completedSessionRef = useRef<number | null>(null);
+
   useEffect(() => {
     if (timer.isCompleted && timer.startedAt) {
+      // 이미 기록된 세션인지 확인 (startedAt timestamp로 구분)
+      if (completedSessionRef.current === timer.startedAt) {
+        return;
+      }
+      completedSessionRef.current = timer.startedAt;
+
       addSession(
         createSessionData(
           timer.mode,
@@ -161,6 +183,11 @@ function FloatingBarContent() {
           timer.mode === "countdown" ? currentPresetIdRef.current : undefined,
         active_sounds_count: activeSoundsRef.current.size,
       });
+
+      // Pro: 타이머 완료 시 트라이얼 차감 (Free 사용자만)
+      if (!pro.isPro) {
+        pro.useTimerTrial();
+      }
     }
   }, [
     timer.isCompleted,
@@ -168,11 +195,38 @@ function FloatingBarContent() {
     timer.mode,
     timer.targetSeconds,
     addSession,
+    pro,
   ]);
 
   // North Star Metric: Track playback time
   // 소리가 활성화되어 있으면 추적 (타이머 유무와 관계없이)
   usePlaybackTracking(activeSounds.size > 0, activeSounds);
+
+  // Pro: 플레이타임 추적 (1초마다)
+  const playtimeIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [upgradeReason, setUpgradeReason] = useState<"playtime" | "timer" | null>(null);
+
+  useEffect(() => {
+    // Pro 사용자가 아니고, 소리가 재생 중일 때만 추적
+    if (!pro.isPro && activeSounds.size > 0) {
+      playtimeIntervalRef.current = setInterval(() => {
+        pro.trackPlaytime(1);
+
+        // 제한 도달 시 모달 표시
+        if (!pro.canPlay()) {
+          setUpgradeReason("playtime");
+          setShowUpgradeModal(true);
+        }
+      }, 1000);
+    }
+
+    return () => {
+      if (playtimeIntervalRef.current) {
+        clearInterval(playtimeIntervalRef.current);
+        playtimeIntervalRef.current = null;
+      }
+    };
+  }, [pro.isPro, activeSounds.size, pro]);
 
   // 미완료 세션 기록 (리셋, 모드 전환 시 호출)
   const recordIncompleteSession = useCallback(() => {
@@ -251,6 +305,23 @@ function FloatingBarContent() {
     [timer]
   );
 
+  // 타이머 시작/정지 핸들러 (트라이얼 체크 포함)
+  const handleTimerTogglePlayPause = useCallback(() => {
+    if (timer.isRunning && !timer.isPaused) {
+      timer.pause();
+    } else if (timer.isPaused) {
+      timer.resume();
+    } else {
+      // 타이머 시작 전 트라이얼 체크 (Free 사용자만)
+      if (!pro.isPro && !pro.canUseTimer()) {
+        setUpgradeReason("timer");
+        setShowUpgradeModal(true);
+        return;
+      }
+      timer.start();
+    }
+  }, [timer, pro]);
+
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % totalSlides);
   };
@@ -279,16 +350,7 @@ function FloatingBarContent() {
             activeSounds={activeSounds}
             isPlaying={timer.isRunning && !timer.isPaused}
             formattedTime={timer.formattedTime}
-            onTogglePlayPause={() => {
-              // 재생/정지 버튼은 타이머만 제어 (소리는 독립적)
-              if (timer.isRunning && !timer.isPaused) {
-                timer.pause();
-              } else if (timer.isPaused) {
-                timer.resume();
-              } else {
-                timer.start();
-              }
-            }}
+            onTogglePlayPause={handleTimerTogglePlayPause}
             onExpand={handleToggleCompact}
             // 타이머 props
             timerMode={timer.mode}
@@ -311,16 +373,7 @@ function FloatingBarContent() {
             onToggleSound={toggleSound}
             onVolumeChange={handleVolumeChange}
             onToggleMute={toggleMute}
-            onTogglePlayPause={() => {
-              // 재생/정지 버튼은 타이머만 제어 (소리는 독립적)
-              if (timer.isRunning && !timer.isPaused) {
-                timer.pause();
-              } else if (timer.isPaused) {
-                timer.resume();
-              } else {
-                timer.start();
-              }
-            }}
+            onTogglePlayPause={handleTimerTogglePlayPause}
             onPrevSlide={prevSlide}
             onNextSlide={nextSlide}
             onMinimize={handleToggleCompact}
@@ -352,6 +405,33 @@ function FloatingBarContent() {
           stats={stats}
           onClose={() => setShowSessionHistory(false)}
           onClear={clearSessions}
+        />
+      )}
+
+      {/* Pro 업그레이드 모달 */}
+      {showUpgradeModal && upgradeReason && (
+        <ProUpgradeModal
+          reason={upgradeReason}
+          onPurchase={() => {
+            setShowUpgradeModal(false);
+            trackEvent("pro_upgrade_clicked", { reason: upgradeReason });
+          }}
+          onDismiss={() => {
+            setShowUpgradeModal(false);
+            trackEvent("pro_upgrade_dismissed", { reason: upgradeReason });
+          }}
+          onActivateLicense={() => {
+            setShowUpgradeModal(false);
+            setShowLicenseModal(true);
+          }}
+        />
+      )}
+
+      {/* 라이센스 입력 모달 */}
+      {showLicenseModal && (
+        <LicenseInputModal
+          onActivate={pro.activateLicenseKey}
+          onClose={() => setShowLicenseModal(false)}
         />
       )}
     </div>

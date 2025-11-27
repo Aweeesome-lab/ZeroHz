@@ -6,6 +6,9 @@ import type { LicenseValidationResponse } from "@/types/pro";
 
 const LEMONSQUEEZY_API_URL = "https://api.lemonsqueezy.com/v1/licenses";
 
+// 어드민 테스트 키 (환경변수로 관리)
+const ADMIN_LICENSE_KEY = process.env.NEXT_PUBLIC_ADMIN_LICENSE_KEY || "";
+
 /**
  * 라이센스 키 검증
  * @param licenseKey - 검증할 라이센스 키
@@ -47,6 +50,23 @@ export async function activateLicense(
   licenseKey: string,
   instanceName?: string
 ): Promise<LicenseValidationResponse> {
+  // 어드민 키 허용
+  if (licenseKey === ADMIN_LICENSE_KEY) {
+    return {
+      valid: true,
+      license_key: {
+        id: 0,
+        status: "active",
+        key: ADMIN_LICENSE_KEY,
+        activation_limit: 999,
+        activation_usage: 1,
+        created_at: new Date().toISOString(),
+        expires_at: null,
+      },
+      error: null,
+    };
+  }
+
   try {
     const response = await fetch(`${LEMONSQUEEZY_API_URL}/activate`, {
       method: "POST",
@@ -114,8 +134,15 @@ export async function deactivateLicense(
  * @returns 형식이 유효한지 여부
  */
 export function isValidLicenseKeyFormat(licenseKey: string): boolean {
+  const trimmed = licenseKey.trim();
+
+  // 어드민 키 허용
+  if (trimmed === ADMIN_LICENSE_KEY) {
+    return true;
+  }
+
   // UUID 형식 체크 (예: E62A381A-EBD9-4280-97B7-6E47A2AE4532)
   const uuidRegex =
     /^[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}$/i;
-  return uuidRegex.test(licenseKey.trim());
+  return uuidRegex.test(trimmed);
 }

@@ -1,5 +1,5 @@
 use tauri::{
-  menu::{Menu, MenuItemBuilder, PredefinedMenuItem, CheckMenuItemBuilder, CheckMenuItem},
+  menu::{Menu, MenuItem, MenuItemBuilder, PredefinedMenuItem, CheckMenuItemBuilder, CheckMenuItem, Submenu},
   tray::TrayIconBuilder,
   Emitter, Manager, PhysicalPosition,
   Runtime,
@@ -10,12 +10,47 @@ use tauri_plugin_updater::UpdaterExt;
 struct TrayMenuState<R: Runtime> {
   ko: CheckMenuItem<R>,
   en: CheckMenuItem<R>,
+  show_window: CheckMenuItem<R>,
+  session_history: MenuItem<R>,
+  autostart: CheckMenuItem<R>,
+  activate_license: MenuItem<R>,
+  language_submenu: Submenu<R>,
+  check_update: MenuItem<R>,
+  quit: MenuItem<R>,
 }
 
 #[tauri::command]
 fn sync_language_tray<R: Runtime>(_app: tauri::AppHandle<R>, state: tauri::State<TrayMenuState<R>>, lang: String) {
   let _ = state.ko.set_checked(lang == "ko");
   let _ = state.en.set_checked(lang == "en");
+}
+
+#[derive(serde::Deserialize)]
+struct TrayLabels {
+  show_window: String,
+  session_history: String,
+  start_at_login: String,
+  activate_license: String,
+  language: String,
+  check_for_updates: String,
+  quit: String,
+}
+
+#[tauri::command]
+fn update_tray_menu<R: Runtime>(_app: tauri::AppHandle<R>, state: tauri::State<TrayMenuState<R>>, labels: TrayLabels) {
+  let _ = state.show_window.set_text(&labels.show_window);
+  let _ = state.session_history.set_text(&labels.session_history);
+  let _ = state.autostart.set_text(&labels.start_at_login);
+  let _ = state.activate_license.set_text(&labels.activate_license);
+  let _ = state.language_submenu.set_text(&labels.language);
+  let _ = state.check_update.set_text(&labels.check_for_updates);
+  let _ = state.quit.set_text(&labels.quit);
+}
+
+#[tauri::command]
+fn sync_pro_status<R: Runtime>(_app: tauri::AppHandle<R>, state: tauri::State<TrayMenuState<R>>, is_pro: bool, label: String) {
+  let _ = state.activate_license.set_text(&label);
+  let _ = state.activate_license.set_enabled(!is_pro);
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -28,6 +63,7 @@ pub fn run() {
     .plugin(tauri_plugin_updater::Builder::new().build())
     .plugin(tauri_plugin_dialog::init())
     .plugin(tauri_plugin_store::Builder::default().build())
+    .plugin(tauri_plugin_opener::init())
     .plugin(tauri_plugin_posthog::init(
       tauri_plugin_posthog::PostHogConfig {
           api_key: option_env!("NEXT_PUBLIC_POSTHOG_KEY").unwrap_or("").to_string(),
@@ -35,7 +71,7 @@ pub fn run() {
           options: None,
       }
     ))
-    .invoke_handler(tauri::generate_handler![sync_language_tray])
+    .invoke_handler(tauri::generate_handler![sync_language_tray, update_tray_menu, sync_pro_status])
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();
 
@@ -112,16 +148,14 @@ pub fn run() {
         .checked(is_enabled)
         .build(app)?;
 
+      let activate_license_item = MenuItemBuilder::new("Activate License")
+        .build(app)?;
+
       // Language Submenu
       let lang_ko_item = CheckMenuItemBuilder::with_id("lang_ko", "한국어")
         .build(app)?;
       let lang_en_item = CheckMenuItemBuilder::with_id("lang_en", "English")
         .build(app)?;
-
-      app.manage(TrayMenuState {
-        ko: lang_ko_item.clone(),
-        en: lang_en_item.clone(),
-      });
 
       let language_submenu = tauri::menu::SubmenuBuilder::new(app, "Language")
         .items(&[&lang_ko_item, &lang_en_item])
@@ -146,6 +180,7 @@ pub fn run() {
       // Store menu item IDs for use in the closure
       let check_update_id = check_update_item.id().clone();
       let autostart_id = autostart_item.id().clone();
+      let activate_license_id = activate_license_item.id().clone();
       let show_window_id = show_window_item.id().clone();
       let session_history_id = session_history_item.id().clone();
       let quit_id = quit_item.id().clone();
@@ -161,6 +196,7 @@ pub fn run() {
           &separator1,
           // Settings
           &autostart_item,
+          &activate_license_item,
           &language_submenu,
           &separator2,
           // App Info
@@ -171,6 +207,19 @@ pub fn run() {
           &quit_item
         ],
       )?;
+
+      // Register tray menu state for i18n updates
+      app.manage(TrayMenuState {
+        ko: lang_ko_item.clone(),
+        en: lang_en_item.clone(),
+        show_window: show_window_item.clone(),
+        session_history: session_history_item.clone(),
+        autostart: autostart_item.clone(),
+        activate_license: activate_license_item.clone(),
+        language_submenu: language_submenu.clone(),
+        check_update: check_update_item.clone(),
+        quit: quit_item.clone(),
+      });
 
       // Load and decode the tray icon PNG
       let tray_icon_bytes = include_bytes!("../icons/tray-icon-template.png");
@@ -311,6 +360,13 @@ pub fn run() {
               let _ = window.show();
               let _ = window.set_focus();
               let _ = window.emit("open-session-history", ());
+            }
+          } else if event.id == activate_license_id {
+            // Show window and emit event to open license input modal
+            if let Some(window) = app.get_webview_window("main") {
+              let _ = window.show();
+              let _ = window.set_focus();
+              let _ = window.emit("open-license-input", ());
             }
           } else if event.id == lang_ko_id {
             let _ = app.emit("change-language", "ko");

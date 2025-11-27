@@ -104,9 +104,9 @@ export function usePro(): UseProReturn {
 
         if (isTauri) {
           const { load } = await import("@tauri-apps/plugin-store");
-          const store = await load(STORE_FILE, { autoSave: true });
+          const store = await load(STORE_FILE, { autoSave: true, defaults: {} });
           storeRef.current = store;
-          saved = await store.get<ProSettingsData>(STORE_KEY);
+          saved = (await store.get<ProSettingsData>(STORE_KEY)) ?? null;
         } else {
           const raw = localStorage.getItem("zerohz_pro_settings");
           if (raw) saved = JSON.parse(raw);

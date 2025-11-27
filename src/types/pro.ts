@@ -59,6 +59,7 @@ export interface ProSettingsData {
   timerTrialUsed: number;
 }
 
-// 상수
-export const FREE_DAILY_PLAYTIME_LIMIT = 60 * 60; // 3600초 (1시간)
-export const FREE_TIMER_TRIAL_COUNT = 3;
+// 상수 (개발 모드에서는 짧은 값 사용)
+const IS_DEV = process.env.NODE_ENV === "development";
+export const FREE_DAILY_PLAYTIME_LIMIT = IS_DEV ? 60 : 2 * 60 * 60; // 개발: 60초, 프로덕션: 7200초 (2시간)
+export const FREE_TIMER_TRIAL_COUNT = IS_DEV ? 1 : 3; // 개발: 1회, 프로덕션: 3회

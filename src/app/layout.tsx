@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { CSPostHogProvider } from "../components/providers";
 import I18nProvider from "@/components/providers/I18nProvider";
 import TrayLanguageSync from "@/components/providers/TrayLanguageSync";
+import TrayProSync from "@/components/providers/TrayProSync";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,6 +34,7 @@ export default function RootLayout({
         <CSPostHogProvider>
           <I18nProvider>
             <TrayLanguageSync />
+            <TrayProSync />
             {children}
           </I18nProvider>
         </CSPostHogProvider>

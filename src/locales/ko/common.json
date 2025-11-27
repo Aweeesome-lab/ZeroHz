@@ -82,5 +82,36 @@
     "countdown": "카운트다운",
     "stopwatch": "스톱워치",
     "cancel": "취소"
+  },
+  "tray": {
+    "showWindow": "창 보기",
+    "sessionHistory": "세션 기록",
+    "startAtLogin": "로그인 시 시작",
+    "activateLicense": "라이센스 활성화",
+    "proActivated": "Pro ✓",
+    "language": "언어",
+    "checkForUpdates": "업데이트 확인",
+    "quit": "종료"
+  },
+  "pro": {
+    "playtimeLimitTitle": "오늘 무료 이용 시간이 끝났어요",
+    "playtimeLimitDescription": "Pro로 업그레이드하면 무제한으로 이용할 수 있어요.",
+    "timerTrialTitle": "타이머 기능이 마음에 드셨나요?",
+    "timerTrialDescription": "Pro로 업그레이드하면 무제한으로 타이머를 사용할 수 있어요.",
+    "featuresTitle": "Pro 기능",
+    "featureUnlimitedPlaytime": "무제한 재생 시간",
+    "featureUnlimitedTimer": "무제한 타이머",
+    "featureAnalytics": "데이터 분석 (출시 예정)",
+    "later": "나중에",
+    "getPro": "Pro 구매하기",
+    "remainingTime": "오늘 남은 시간",
+    "trialRemaining": "{{count}}회 남음",
+    "activateLicense": "라이센스 활성화",
+    "enterLicenseKey": "라이센스 키 입력",
+    "activate": "활성화",
+    "invalidLicense": "유효하지 않은 라이센스 키입니다",
+    "activated": "Pro 활성화됨",
+    "haveLicense": "이미 라이센스 키가 있으신가요?",
+    "buyLicense": "라이센스 구매하기"
   }
 }
