@@ -2,7 +2,15 @@
 
 import { useEffect, useRef, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { X, Trash2, Clock, CheckCircle, XCircle, Calendar, AlertTriangle } from "lucide-react";
+import {
+  X,
+  Trash2,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Calendar,
+  AlertTriangle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { TimerSession, SessionStats } from "@/types/timer";
 import { TIMER_PRESETS } from "@/constants/timer";
@@ -43,7 +51,9 @@ function formatDuration(seconds: number, t: (key: string) => string): string {
     )} ${secs}${t("sessionHistory.time.seconds")}`;
   }
   if (mins > 0) {
-    return `${mins}${t("sessionHistory.time.minutes")} ${secs}${t("sessionHistory.time.seconds")}`;
+    return `${mins}${t("sessionHistory.time.minutes")} ${secs}${t(
+      "sessionHistory.time.seconds"
+    )}`;
   }
   return `${secs}${t("sessionHistory.time.seconds")}`;
 }
@@ -110,6 +120,11 @@ function SessionItem({ session }: { session: TimerSession }) {
           {formatTime(session.actualSeconds)}
         </span>
       </div>
+      {session.taskDescription && (
+        <div className="text-white/50 text-xs mb-1.5 line-clamp-2">
+          {session.taskDescription}
+        </div>
+      )}
       <div className="flex items-center justify-between text-[10px]">
         <span className="text-white/30">
           {new Date(session.startedAt).toLocaleTimeString(
@@ -258,11 +273,15 @@ export function SessionHistoryModal({
         <div className="grid grid-cols-2 gap-2 mb-4">
           <div className="bg-white/5 rounded-lg p-3 border border-white/5">
             <div className="text-white/40 text-xs mb-1">
-              {t("sessionHistory.stats.todayFocusTime")}({stats.todaySessions.length})
+              {t("sessionHistory.stats.todayFocusTime")}(
+              {stats.todaySessions.length})
             </div>
             <div className="text-white text-lg font-bold">
               {formatDuration(
-                stats.todaySessions.reduce((sum, s) => sum + s.actualSeconds, 0),
+                stats.todaySessions.reduce(
+                  (sum, s) => sum + s.actualSeconds,
+                  0
+                ),
                 t
               )}
             </div>

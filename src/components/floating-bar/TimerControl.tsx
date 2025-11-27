@@ -17,8 +17,8 @@ interface TimerControlProps {
   isCompleted: boolean;
   targetSeconds: number;
   onToggleMode: () => void;
-  onSetPreset: (preset: TimerPreset) => void;
-  onSetCustom: (seconds: number) => void;
+  onSetPreset: (preset: TimerPreset, taskDescription?: string) => void;
+  onSetCustom: (seconds: number, taskDescription?: string) => void;
   onReset: () => void;
   // 세션 히스토리 props
   sessions: TimerSession[];
@@ -134,12 +134,12 @@ export function TimerControl({
           currentMode={mode}
           currentTarget={targetSeconds}
           onClose={() => setShowSettings(false)}
-          onSetPreset={(preset) => {
-            onSetPreset(preset);
+          onSetPreset={(preset, taskDescription) => {
+            onSetPreset(preset, taskDescription);
             setShowSettings(false);
           }}
-          onSetCustom={(seconds) => {
-            onSetCustom(seconds);
+          onSetCustom={(seconds, taskDescription) => {
+            onSetCustom(seconds, taskDescription);
             setShowSettings(false);
           }}
           onToggleMode={onToggleMode}

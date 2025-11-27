@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.1] - 2025-11-27
+
+### Added
+
+- **Task Description**: You can now add a task description when starting a focus timer session. The description will be saved with the session and displayed in the session history.
+
 ## [0.1.27] - 2025-11-26
 
 ### Fixed

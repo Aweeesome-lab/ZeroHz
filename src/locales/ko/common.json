@@ -6,6 +6,10 @@
       "stopwatch": "스톱워치",
       "countdown": "카운트다운"
     },
+    "taskDescription": {
+      "label": "작업 내용",
+      "placeholder": "무엇을 하시나요? (선택사항)"
+    },
     "preset": {
       "label": "프리셋 선택",
       "minutes": "분"

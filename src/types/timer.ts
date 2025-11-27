@@ -31,6 +31,7 @@ export interface TimerSession {
   endedAt: number;
   activeSounds: string[]; // 함께 재생된 사운드 ID들
   preset?: string; // 사용한 프리셋 ID
+  taskDescription?: string; // 작업 내용 설명
 }
 
 export interface SessionStats {

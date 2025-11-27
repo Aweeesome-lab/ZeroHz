@@ -30,6 +30,9 @@ function FloatingBarContent() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const totalSlides = Math.ceil(SOUNDS.length / ITEMS_PER_SLIDE);
   const [currentPresetId, setCurrentPresetId] = useState<string | undefined>();
+  const [currentTaskDescription, setCurrentTaskDescription] = useState<
+    string | undefined
+  >();
   const [showSessionHistory, setShowSessionHistory] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
@@ -115,6 +118,7 @@ function FloatingBarContent() {
   // 타이머 refs (콜백에서 최신 값 참조용)
   const activeSoundsRef = useRef(activeSounds);
   const currentPresetIdRef = useRef(currentPresetId);
+  const currentTaskDescriptionRef = useRef(currentTaskDescription);
 
   useEffect(() => {
     activeSoundsRef.current = activeSounds;
@@ -123,6 +127,10 @@ function FloatingBarContent() {
   useEffect(() => {
     currentPresetIdRef.current = currentPresetId;
   }, [currentPresetId]);
+
+  useEffect(() => {
+    currentTaskDescriptionRef.current = currentTaskDescription;
+  }, [currentTaskDescription]);
 
   // Tauri 이벤트 리스너 (트레이 메뉴에서 세션 기록/라이센스 열기)
   useEffect(() => {
@@ -171,7 +179,8 @@ function FloatingBarContent() {
           timer.startedAt,
           true,
           Array.from(activeSoundsRef.current),
-          timer.mode === "countdown" ? currentPresetIdRef.current : undefined
+          timer.mode === "countdown" ? currentPresetIdRef.current : undefined,
+          currentTaskDescriptionRef.current
         )
       );
 
@@ -204,7 +213,9 @@ function FloatingBarContent() {
 
   // Pro: 플레이타임 추적 (1초마다)
   const playtimeIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const [upgradeReason, setUpgradeReason] = useState<"playtime" | "timer" | null>(null);
+  const [upgradeReason, setUpgradeReason] = useState<
+    "playtime" | "timer" | null
+  >(null);
 
   useEffect(() => {
     // Pro 사용자가 아니고, 소리가 재생 중일 때만 추적
@@ -245,7 +256,8 @@ function FloatingBarContent() {
             timer.startedAt,
             false,
             Array.from(activeSoundsRef.current),
-            timer.mode === "countdown" ? currentPresetIdRef.current : undefined
+            timer.mode === "countdown" ? currentPresetIdRef.current : undefined,
+            currentTaskDescriptionRef.current
           )
         );
 
@@ -280,8 +292,9 @@ function FloatingBarContent() {
 
   // 프리셋 설정 핸들러
   const handleSetPreset = useCallback(
-    (preset: TimerPreset) => {
+    (preset: TimerPreset, taskDescription?: string) => {
       setCurrentPresetId(preset.id);
+      setCurrentTaskDescription(taskDescription);
       timer.setPreset(preset);
 
       trackEvent("timer_preset_selected", {
@@ -294,8 +307,9 @@ function FloatingBarContent() {
 
   // 커스텀 시간 설정 핸들러
   const handleSetCustom = useCallback(
-    (seconds: number) => {
+    (seconds: number, taskDescription?: string) => {
       setCurrentPresetId(undefined);
+      setCurrentTaskDescription(taskDescription);
       timer.setTarget(seconds);
 
       trackEvent("timer_custom_set", {

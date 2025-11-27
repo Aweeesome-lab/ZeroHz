@@ -210,7 +210,8 @@ export function createSessionData(
   startedAt: number,
   completed: boolean,
   activeSounds: string[],
-  preset?: string
+  preset?: string,
+  taskDescription?: string
 ): Omit<TimerSession, "id"> {
   return {
     mode,
@@ -221,5 +222,6 @@ export function createSessionData(
     endedAt: Date.now(),
     activeSounds,
     preset,
+    taskDescription,
   };
 }

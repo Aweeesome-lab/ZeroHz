@@ -11,8 +11,8 @@ interface TimerSettingsModalProps {
   currentMode: TimerMode;
   currentTarget: number;
   onClose: () => void;
-  onSetPreset: (preset: TimerPreset) => void;
-  onSetCustom: (seconds: number) => void;
+  onSetPreset: (preset: TimerPreset, taskDescription?: string) => void;
+  onSetCustom: (seconds: number, taskDescription?: string) => void;
   onToggleMode: () => void;
 }
 
@@ -31,6 +31,7 @@ export function TimerSettingsModal({
   const [customMinutes, setCustomMinutes] = useState(
     Math.floor(currentTarget / 60)
   );
+  const [taskDescription, setTaskDescription] = useState("");
   const modalRef = useRef<HTMLDivElement>(null);
   const originalSizeRef = useRef<{ width: number; height: number } | null>(
     null
@@ -156,6 +157,20 @@ export function TimerSettingsModal({
         {/* 카운트다운 프리셋 (카운트다운 모드일 때만) */}
         {currentMode === "countdown" && (
           <>
+            {/* 작업 내용 입력 */}
+            <div className="mb-4">
+              <div className="text-white/50 text-xs mb-2">
+                {t("timerSettings.taskDescription.label")}
+              </div>
+              <input
+                type="text"
+                value={taskDescription}
+                onChange={(e) => setTaskDescription(e.target.value)}
+                placeholder={t("timerSettings.taskDescription.placeholder")}
+                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-white/30 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/30"
+              />
+            </div>
+
             <div className="mb-4">
               <div className="text-white/50 text-xs mb-2">
                 {t("timerSettings.preset.label")}
@@ -164,7 +179,10 @@ export function TimerSettingsModal({
                 {TIMER_PRESETS.map((preset) => (
                   <button
                     key={preset.id}
-                    onClick={() => onSetPreset(preset)}
+                    onClick={() => {
+                      onSetPreset(preset, taskDescription);
+                      setTaskDescription("");
+                    }}
                     className={cn(
                       "p-2.5 rounded-lg border transition-all text-center",
                       currentTarget === preset.seconds
@@ -209,7 +227,10 @@ export function TimerSettingsModal({
                   {t("timerSettings.custom.unit")}
                 </span>
                 <button
-                  onClick={() => onSetCustom(customMinutes * 60)}
+                  onClick={() => {
+                    onSetCustom(customMinutes * 60, taskDescription);
+                    setTaskDescription("");
+                  }}
                   className="flex-1 bg-blue-500/20 text-blue-400 rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-500/30 transition-all"
                 >
                   {t("timerSettings.custom.apply")}

@@ -6,6 +6,10 @@
       "stopwatch": "Stopwatch",
       "countdown": "Countdown"
     },
+    "taskDescription": {
+      "label": "Task",
+      "placeholder": "What are you working on? (optional)"
+    },
     "preset": {
       "label": "Select Preset",
       "minutes": "min"
