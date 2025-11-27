@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { CSPostHogProvider } from "../components/providers";
 import I18nProvider from "@/components/providers/I18nProvider";
+import { ProProvider } from "@/components/providers/ProProvider";
 import TrayLanguageSync from "@/components/providers/TrayLanguageSync";
 import TrayProSync from "@/components/providers/TrayProSync";
 import "./globals.css";
@@ -33,9 +34,11 @@ export default function RootLayout({
       >
         <CSPostHogProvider>
           <I18nProvider>
-            <TrayLanguageSync />
-            <TrayProSync />
-            {children}
+            <ProProvider>
+              <TrayLanguageSync />
+              <TrayProSync />
+              {children}
+            </ProProvider>
           </I18nProvider>
         </CSPostHogProvider>
       </body>
