@@ -292,6 +292,9 @@ jobs:
             
           echo "Generated latest.json:"
           cat latest.json
-          
+
           # Upload latest.json to Vercel Blob
           node web/scripts/upload-to-blob.mjs "latest.json"
+
+          # Upload latest.json to GitHub Release
+          gh release upload "${{ github.ref_name }}" latest.json --clobber --repo ${{ github.repository }}

@@ -147,6 +147,15 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
+              version="v0.1.30"
+              date="November 27, 2025"
+              changes={[
+                "Added focus timer with stopwatch and countdown modes",
+                "Session history tracking with statistics",
+                "Tray menu reorganization for better usability",
+              ]}
+            />
+            <ReleaseItem
               version="v0.1.26"
               date="November 26, 2025"
               changes={["Stability improvements"]}
