@@ -5,3 +5,4 @@ export { usePlaybackTracking } from "./usePlaybackTracking";
 export { useTimer } from "./useTimer";
 export { useTimerSessions, createSessionData } from "./useTimerSessions";
 export { useAppSettings } from "./useAppSettings";
+export { usePro } from "./usePro";
