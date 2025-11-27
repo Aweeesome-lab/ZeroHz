@@ -41,13 +41,17 @@ jobs:
       - name: Create .env.local file for Next.js build
         shell: bash
         run: |
-          # Create .env.local for Next.js (takes precedence over .env)
+          # Create .env.local in the correct location (src/ for Next.js app)
           echo "NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}" > .env.local
           echo "NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}" >> .env.local
 
           # Verify the file was created correctly
           echo "Created .env.local with PostHog configuration:"
           cat .env.local | sed 's/=.*/=***/' # Show keys but hide values
+
+          # Also export for Rust compilation (option_env! reads at compile time)
+          echo "NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}" >> $GITHUB_ENV
+          echo "NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}" >> $GITHUB_ENV
 
       - name: Verify PostHog secrets are set
         shell: bash
