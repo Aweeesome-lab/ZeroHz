@@ -1,0 +1,82 @@
+{
+  "timerSettings": {
+    "title": "타이머 설정",
+    "mode": {
+      "label": "모드 선택",
+      "stopwatch": "스톱워치",
+      "countdown": "카운트다운"
+    },
+    "preset": {
+      "label": "프리셋 선택",
+      "minutes": "분"
+    },
+    "custom": {
+      "label": "커스텀 설정",
+      "unit": "분",
+      "apply": "적용"
+    },
+    "stopwatchGuide": {
+      "line1": "스톱워치 모드에서는 시간이 무한히 증가합니다.",
+      "line2": "리셋 버튼으로 초기화할 수 있습니다."
+    }
+  },
+  "sessionHistory": {
+    "title": "세션 기록",
+    "stats": {
+      "total": "총 세션",
+      "completionRate": "완료율",
+      "focusTime": "총 집중 시간"
+    },
+    "chart": {
+      "week": "최근 7일"
+    },
+    "empty": "아직 세션이 없습니다",
+    "date": {
+      "today": "오늘",
+      "yesterday": "어제"
+    },
+    "delete": {
+      "confirm": "모든 세션 기록을 삭제하시겠습니까?",
+      "button": "모든 기록 삭제"
+    },
+    "soundCount": "개 사운드",
+    "time": {
+      "hours": "시간",
+      "minutes": "분"
+    }
+  },
+  "timerControl": {
+    "mode": {
+      "countdown": "카운트다운 모드",
+      "stopwatch": "스톱워치 모드"
+    },
+    "action": {
+      "start": "시작",
+      "pause": "일시정지",
+      "resume": "재개",
+      "reset": "리셋",
+      "history": "세션 기록",
+      "settings": "타이머 설정"
+    }
+  },
+  "compactView": {
+    "play": "Play",
+    "pause": "Pause",
+    "expand": "Expand",
+    "mode": {
+      "countdown": "카운트다운",
+      "stopwatch": "스톱워치"
+    }
+  },
+  "presets": {
+    "pomodoro": "뽀모도로",
+    "shortBreak": "짧은 휴식",
+    "longBreak": "긴 휴식",
+    "focus": "집중 세션",
+    "hour": "1시간"
+  },
+  "common": {
+    "countdown": "카운트다운",
+    "stopwatch": "스톱워치"
+  }
+}

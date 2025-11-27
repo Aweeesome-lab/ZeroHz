@@ -34,9 +34,14 @@ if (typeof window !== "undefined") {
         api_host: host || "https://app.posthog.com",
         person_profiles: "identified_only",
         persistence: "localStorage", // Critical for Tauri/Desktop apps
-        debug: true, // Enable debug mode to see logs in production console
+        debug: process.env.NODE_ENV === "development",
         loaded: (ph) => {
-          console.log("PostHog loaded successfully. ID:", ph.get_distinct_id());
+          if (process.env.NODE_ENV === "development") {
+            console.log(
+              "PostHog loaded successfully. ID:",
+              ph.get_distinct_id()
+            );
+          }
         },
       });
     } else {
@@ -49,12 +54,28 @@ if (typeof window !== "undefined") {
   }
 }
 
+import { analyticsState } from "@/lib/analytics"; // Import to force initialization side-effect
+
 export function CSPostHogProvider({ children }: { children: React.ReactNode }) {
   const [status] = useState<AnalyticsStatus>(() => {
     if (typeof window !== "undefined") {
       const tauriWindow = window as unknown as TauriWindow;
       if ("__TAURI_INTERNALS__" in tauriWindow || "__TAURI__" in tauriWindow) {
-        return { isReady: true, error: null };
+        // For Tauri, we check the state from analytics.ts
+        // Note: It might not be fully initialized yet (async loaded callback),
+        // but if the key was present, we consider it "ready" to accept events (they buffer).
+        // If there was a sync error (missing key), it would be in analyticsState.error.
+
+        if (analyticsState.error) {
+          return { isReady: false, error: analyticsState.error };
+        }
+
+        // Check env var as fallback/confirmation
+        if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+          return { isReady: true, error: null };
+        } else {
+          return { isReady: false, error: "Missing Key" };
+        }
       }
     }
 

@@ -1,0 +1,82 @@
+{
+  "timerSettings": {
+    "title": "Timer Settings",
+    "mode": {
+      "label": "Select Mode",
+      "stopwatch": "Stopwatch",
+      "countdown": "Countdown"
+    },
+    "preset": {
+      "label": "Select Preset",
+      "minutes": "min"
+    },
+    "custom": {
+      "label": "Custom",
+      "unit": "min",
+      "apply": "Apply"
+    },
+    "stopwatchGuide": {
+      "line1": "In stopwatch mode, time increases indefinitely.",
+      "line2": "You can reset it using the reset button."
+    }
+  },
+  "sessionHistory": {
+    "title": "Session History",
+    "stats": {
+      "total": "Total Sessions",
+      "completionRate": "Completion Rate",
+      "focusTime": "Total Focus Time"
+    },
+    "chart": {
+      "week": "Last 7 Days"
+    },
+    "empty": "No sessions yet",
+    "date": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
+    "delete": {
+      "confirm": "Are you sure you want to delete all session history?",
+      "button": "Clear All History"
+    },
+    "soundCount": "sounds",
+    "time": {
+      "hours": "h",
+      "minutes": "m"
+    }
+  },
+  "timerControl": {
+    "mode": {
+      "countdown": "Countdown Mode",
+      "stopwatch": "Stopwatch Mode"
+    },
+    "action": {
+      "start": "Start",
+      "pause": "Pause",
+      "resume": "Resume",
+      "reset": "Reset",
+      "history": "Session History",
+      "settings": "Timer Settings"
+    }
+  },
+  "compactView": {
+    "play": "Play",
+    "pause": "Pause",
+    "expand": "Expand",
+    "mode": {
+      "countdown": "Countdown",
+      "stopwatch": "Stopwatch"
+    }
+  },
+  "presets": {
+    "pomodoro": "Pomodoro",
+    "shortBreak": "Short Break",
+    "longBreak": "Long Break",
+    "focus": "Focus Session",
+    "hour": "1 Hour"
+  },
+  "common": {
+    "countdown": "Countdown",
+    "stopwatch": "Stopwatch"
+  }
+}

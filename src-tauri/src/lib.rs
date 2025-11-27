@@ -1,10 +1,22 @@
 use tauri::{
-  menu::{Menu, MenuItemBuilder, PredefinedMenuItem, CheckMenuItemBuilder},
+  menu::{Menu, MenuItemBuilder, PredefinedMenuItem, CheckMenuItemBuilder, CheckMenuItem},
   tray::TrayIconBuilder,
-  Manager, PhysicalPosition,
+  Emitter, Manager, PhysicalPosition,
+  Runtime,
 };
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_updater::UpdaterExt;
+
+struct TrayMenuState<R: Runtime> {
+  ko: CheckMenuItem<R>,
+  en: CheckMenuItem<R>,
+}
+
+#[tauri::command]
+fn sync_language_tray<R: Runtime>(_app: tauri::AppHandle<R>, state: tauri::State<TrayMenuState<R>>, lang: String) {
+  let _ = state.ko.set_checked(lang == "ko");
+  let _ = state.en.set_checked(lang == "en");
+}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -15,6 +27,7 @@ pub fn run() {
     ))
     .plugin(tauri_plugin_updater::Builder::new().build())
     .plugin(tauri_plugin_dialog::init())
+    .plugin(tauri_plugin_store::Builder::default().build())
     .plugin(tauri_plugin_posthog::init(
       tauri_plugin_posthog::PostHogConfig {
           api_key: option_env!("NEXT_PUBLIC_POSTHOG_KEY").unwrap_or("").to_string(),
@@ -22,6 +35,7 @@ pub fn run() {
           options: None,
       }
     ))
+    .invoke_handler(tauri::generate_handler![sync_language_tray])
     .setup(|app| {
       let window = app.get_webview_window("main").unwrap();
 
@@ -101,8 +115,29 @@ pub fn run() {
         .checked(true)
         .build(app)?;
 
+      let session_history_item = MenuItemBuilder::new("Session History")
+        .build(app)?;
+
+      let open_data_folder_item = MenuItemBuilder::new("Open Data Folder")
+        .build(app)?;
+
       let separator3 = PredefinedMenuItem::separator(app)?;
+
+      // Language Submenu
+      let lang_ko_item = CheckMenuItemBuilder::with_id("lang_ko", "한국어")
+        .build(app)?;
+      let lang_en_item = CheckMenuItemBuilder::with_id("lang_en", "English")
+        .build(app)?;
       
+      app.manage(TrayMenuState {
+        ko: lang_ko_item.clone(),
+        en: lang_en_item.clone(),
+      });
+
+      let language_submenu = tauri::menu::SubmenuBuilder::new(app, "Language")
+        .items(&[&lang_ko_item, &lang_en_item])
+        .build()?;
+
       let quit_item = MenuItemBuilder::new("Quit")
         .build(app)?;
 
@@ -110,11 +145,30 @@ pub fn run() {
       let check_update_id = check_update_item.id().clone();
       let autostart_id = autostart_item.id().clone();
       let show_window_id = show_window_item.id().clone();
+      let session_history_id = session_history_item.id().clone();
+      let open_data_folder_id = open_data_folder_item.id().clone();
       let quit_id = quit_item.id().clone();
+      let lang_ko_id = lang_ko_item.id().clone();
+      let lang_en_id = lang_en_item.id().clone();
+
+      // Get app data dir for menu handler
+      let app_data_dir = app.path().app_data_dir().ok();
 
       let menu = Menu::with_items(
         app,
-        &[&version_item, &separator1, &check_update_item, &separator2, &autostart_item, &show_window_item, &separator3, &quit_item],
+        &[
+          &version_item, 
+          &separator1, 
+          &check_update_item, 
+          &separator2, 
+          &autostart_item, 
+          &show_window_item, 
+          &language_submenu,
+          &session_history_item, 
+          &open_data_folder_item, 
+          &separator3, 
+          &quit_item
+        ],
       )?;
 
       // Load and decode the tray icon PNG
@@ -248,6 +302,114 @@ pub fn run() {
               } else {
                 let _ = window.show();
                 let _ = window.set_focus();
+              }
+            }
+          } else if event.id == session_history_id {
+            // Show window and emit event to open session history modal
+            if let Some(window) = app.get_webview_window("main") {
+              let _ = window.show();
+              let _ = window.set_focus();
+              let _ = window.emit("open-session-history", ());
+            }
+          } else if event.id == open_data_folder_id {
+            // Open data folder in Finder
+            if let Some(ref path) = app_data_dir {
+              // Ensure the directory exists
+              if !path.exists() {
+                if let Err(e) = std::fs::create_dir_all(path) {
+                  println!("Failed to create data directory: {:?}", e);
+                  use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+                  app.dialog()
+                    .message(format!("Failed to create data directory: {}", e))
+                    .title("Error")
+                    .kind(MessageDialogKind::Error)
+                    .blocking_show();
+                  return;
+                }
+              }
+
+              let path_str = path.to_string_lossy().to_string();
+              #[cfg(target_os = "macos")]
+              {
+                // Use -R flag to reveal in Finder (avoids .app extension being treated as application)
+                if let Err(e) = std::process::Command::new("open")
+                  .arg("-R")
+                  .arg(&path_str)
+                  .spawn() {
+                  println!("Failed to open data folder: {:?}", e);
+                  use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+                  app.dialog()
+                    .message(format!("Failed to open data folder: {}", e))
+                    .title("Error")
+                    .kind(MessageDialogKind::Error)
+                    .blocking_show();
+                }
+              }
+              #[cfg(target_os = "windows")]
+              {
+                if let Err(e) = std::process::Command::new("explorer")
+                  .arg(&path_str)
+                  .spawn() {
+                  println!("Failed to open data folder: {:?}", e);
+                  use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+                  app.dialog()
+                    .message(format!("Failed to open data folder: {}", e))
+                    .title("Error")
+                    .kind(MessageDialogKind::Error)
+                    .blocking_show();
+                }
+              }
+              #[cfg(target_os = "linux")]
+              {
+                if let Err(e) = std::process::Command::new("xdg-open")
+                  .arg(&path_str)
+                  .spawn() {
+                  println!("Failed to open data folder: {:?}", e);
+                  use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+                  app.dialog()
+                    .message(format!("Failed to open data folder: {}", e))
+                    .title("Error")
+                    .kind(MessageDialogKind::Error)
+                    .blocking_show();
+                }
+              }
+            } else {
+              println!("Data directory path is not available");
+              use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
+              app.dialog()
+                .message("Data directory path is not available")
+                .title("Error")
+                .kind(MessageDialogKind::Error)
+                .blocking_show();
+            }
+          } else if event.id == lang_ko_id {
+            let _ = app.emit("change-language", "ko");
+            // Update menu state
+            if let Some(menu) = app.menu() {
+              if let Some(item) = menu.get(&lang_ko_id) {
+                if let Some(check_item) = item.as_check_menuitem() {
+                  let _ = check_item.set_checked(true);
+                }
+              }
+              if let Some(item) = menu.get(&lang_en_id) {
+                if let Some(check_item) = item.as_check_menuitem() {
+                  let _ = check_item.set_checked(false);
+                }
+              }
+            }
+          } else if event.id == lang_en_id {
+            let _ = app.emit("change-language", "en");
+            // Update menu state
+            if let Some(menu) = app.menu() {
+              if let Some(item) = menu.get(&lang_ko_id) {
+                if let Some(check_item) = item.as_check_menuitem() {
+                  let _ = check_item.set_checked(false);
+                }
+              }
+              if let Some(item) = menu.get(&lang_en_id) {
+                if let Some(check_item) = item.as_check_menuitem() {
+                  let _ = check_item.set_checked(true);
+                }
               }
             }
           }

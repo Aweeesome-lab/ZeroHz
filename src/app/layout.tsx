@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { CSPostHogProvider } from "../components/providers";
+import I18nProvider from "@/components/providers/I18nProvider";
+import TrayLanguageSync from "@/components/providers/TrayLanguageSync";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,7 +30,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <CSPostHogProvider>{children}</CSPostHogProvider>
+        <CSPostHogProvider>
+          <I18nProvider>
+            <TrayLanguageSync />
+            {children}
+          </I18nProvider>
+        </CSPostHogProvider>
       </body>
     </html>
   );

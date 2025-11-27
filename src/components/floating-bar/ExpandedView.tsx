@@ -11,24 +11,18 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SoundButton } from "./SoundButton";
+import { TimerControl } from "./TimerControl";
 import { SOUNDS, ITEMS_PER_SLIDE } from "@/constants/sounds";
 import type { SoundType, SoundVolumes } from "@/types/audio";
+import type {
+  TimerMode,
+  TimerPreset,
+  SessionStats,
+  TimerSession,
+} from "@/types/timer";
 
 /**
  * ExpandedView - 플로팅 바의 확장된 뷰 컴포넌트
- *
- * @param activeSounds - 현재 활성화된 사운드 ID들의 Set
- * @param volumes - 각 사운드별 볼륨 값 (0~1)을 담은 객체
- * @param isMuted - 전체 음소거 상태
- * @param isPlaying - 오디오 재생 상태 (true: 재생 중, false: 일시정지)
- * @param currentSlide - 현재 표시 중인 슬라이드 인덱스 (0부터 시작)
- * @param onToggleSound - 특정 사운드 활성화/비활성화 토글 콜백
- * @param onVolumeChange - 특정 사운드의 볼륨 변경 콜백 (id, 0~1 값)
- * @param onToggleMute - 전체 음소거 토글 콜백
- * @param onTogglePlayPause - 재생/일시정지 토글 콜백
- * @param onPrevSlide - 이전 슬라이드로 이동하는 콜백
- * @param onNextSlide - 다음 슬라이드로 이동하는 콜백
- * @param onMinimize - 축소 모드로 전환하는 콜백
  */
 interface ExpandedViewProps {
   activeSounds: Set<SoundType>;
@@ -43,6 +37,23 @@ interface ExpandedViewProps {
   onPrevSlide: () => void;
   onNextSlide: () => void;
   onMinimize: () => void;
+  // 타이머 props
+  timerMode: TimerMode;
+  timerFormattedTime: string;
+  timerProgress: number;
+  timerTargetSeconds: number;
+  isTimerRunning: boolean;
+  isTimerPaused: boolean;
+  isTimerWarning: boolean;
+  isTimerCompleted: boolean;
+  onTimerToggleMode: () => void;
+  onTimerSetPreset: (preset: TimerPreset) => void;
+  onTimerSetCustom: (seconds: number) => void;
+  onTimerReset: () => void;
+  // 세션 기록 props
+  timerSessions: TimerSession[];
+  timerStats: SessionStats;
+  onClearSessions: () => void;
 }
 
 export function ExpandedView({
@@ -58,6 +69,23 @@ export function ExpandedView({
   onPrevSlide,
   onNextSlide,
   onMinimize,
+  // 타이머 props
+  timerMode,
+  timerFormattedTime,
+  timerProgress,
+  timerTargetSeconds,
+  isTimerRunning,
+  isTimerPaused,
+  isTimerWarning,
+  isTimerCompleted,
+  onTimerToggleMode,
+  onTimerSetPreset,
+  onTimerSetCustom,
+  onTimerReset,
+  // 세션 기록 props
+  timerSessions,
+  timerStats,
+  onClearSessions,
 }: ExpandedViewProps) {
   const visibleSounds = SOUNDS.slice(
     currentSlide * ITEMS_PER_SLIDE,
@@ -66,6 +94,7 @@ export function ExpandedView({
 
   return (
     <>
+      {/* 사운드 네비게이션 - 이전 */}
       <button
         onClick={onPrevSlide}
         className="p-1.5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all"
@@ -74,6 +103,7 @@ export function ExpandedView({
         <ChevronLeft size={16} />
       </button>
 
+      {/* 사운드 버튼들 */}
       <div className="flex gap-2">
         {visibleSounds.map((sound) => (
           <SoundButton
@@ -87,6 +117,7 @@ export function ExpandedView({
         ))}
       </div>
 
+      {/* 사운드 네비게이션 - 다음 */}
       <button
         onClick={onNextSlide}
         className="p-1.5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all"
@@ -97,6 +128,28 @@ export function ExpandedView({
 
       <div className="w-px h-6 bg-white/20 mx-1" />
 
+      {/* 타이머 컨트롤 */}
+      <TimerControl
+        mode={timerMode}
+        formattedTime={timerFormattedTime}
+        progress={timerProgress}
+        isRunning={isTimerRunning}
+        isPaused={isTimerPaused}
+        isWarning={isTimerWarning}
+        isCompleted={isTimerCompleted}
+        targetSeconds={timerTargetSeconds}
+        onToggleMode={onTimerToggleMode}
+        onSetPreset={onTimerSetPreset}
+        onSetCustom={onTimerSetCustom}
+        onReset={onTimerReset}
+        sessions={timerSessions}
+        stats={timerStats}
+        onClearSessions={onClearSessions}
+      />
+
+      <div className="w-px h-6 bg-white/20 mx-1" />
+
+      {/* 음소거 버튼 */}
       <button
         onClick={onToggleMute}
         className={cn(
@@ -111,6 +164,7 @@ export function ExpandedView({
         {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
       </button>
 
+      {/* 재생/일시정지 버튼 */}
       <button
         onClick={onTogglePlayPause}
         className={cn(
@@ -127,6 +181,7 @@ export function ExpandedView({
 
       <div className="w-px h-6 bg-white/20 mx-1" />
 
+      {/* 최소화 버튼 */}
       <button
         onClick={onMinimize}
         className="p-1.5 rounded-full text-white/50 hover:text-white hover:bg-white/10 transition-all"

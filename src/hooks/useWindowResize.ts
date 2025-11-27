@@ -9,7 +9,7 @@ interface WindowDimensions {
 
 const DEFAULT_DIMENSIONS: WindowDimensions = {
   compact: { width: 280, height: 60 },
-  expanded: { width: 500, height: 100 },
+  expanded: { width: 700, height: 100 },
 };
 
 /**

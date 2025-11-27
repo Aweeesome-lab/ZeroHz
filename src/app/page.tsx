@@ -1,6 +1,12 @@
 "use client";
 
-import { FloatingBar } from "@/components/floating-bar";
+import dynamic from "next/dynamic";
+
+const FloatingBar = dynamic(
+  () =>
+    import("@/components/floating-bar").then((mod) => ({ default: mod.FloatingBar })),
+  { ssr: false }
+);
 
 export default function Home() {
   return (

@@ -27,11 +27,26 @@ interface UseAudioPlayerReturn {
   togglePlayPause: () => Promise<void>;
 }
 
-export function useAudioPlayer(): UseAudioPlayerReturn {
-  const [activeSounds, setActiveSounds] = useState<Set<SoundType>>(new Set());
-  const [volumes, setVolumes] = useState<SoundVolumes>(DEFAULT_VOLUMES);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
+interface UseAudioPlayerOptions {
+  initialVolumes?: SoundVolumes;
+  initialMuted?: boolean;
+  initialActiveSounds?: Set<SoundType>;
+}
+
+export function useAudioPlayer(
+  options: UseAudioPlayerOptions = {}
+): UseAudioPlayerReturn {
+  const {
+    initialVolumes = DEFAULT_VOLUMES,
+    initialMuted = false,
+    initialActiveSounds = new Set(),
+  } = options;
+
+  const [activeSounds, setActiveSounds] =
+    useState<Set<SoundType>>(initialActiveSounds);
+  const [volumes, setVolumes] = useState<SoundVolumes>(initialVolumes);
+  const [isMuted, setIsMuted] = useState(initialMuted);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // Web Audio API refs
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -207,26 +222,17 @@ export function useAudioPlayer(): UseAudioPlayerReturn {
     });
   }, [volumes, isMuted]);
 
-  const toggleSound = useCallback(
-    (id: SoundType) => {
-      setActiveSounds((prev) => {
-        const newSet = new Set(prev);
-        if (newSet.has(id)) {
-          newSet.delete(id);
-        } else {
-          newSet.add(id);
-        }
-        return newSet;
-      });
-
-      // If we are adding the first sound, ensure we are playing
-      if (activeSounds.size === 0 && !isPlaying) {
-        audioContextRef.current?.resume();
-        setIsPlaying(true);
+  const toggleSound = useCallback((id: SoundType) => {
+    setActiveSounds((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
       }
-    },
-    [activeSounds.size, isPlaying]
-  );
+      return newSet;
+    });
+  }, []);
 
   const handleVolumeChange = useCallback((id: SoundType, value: number) => {
     setVolumes((prev) => ({ ...prev, [id]: value }));
