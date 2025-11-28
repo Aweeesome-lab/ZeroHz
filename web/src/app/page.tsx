@@ -191,7 +191,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Free Plan */}
             <div className="h-full flex flex-col p-8 rounded-3xl bg-white border border-black/5 shadow-sm hover:shadow-md transition-all duration-300">
-              <div className="mb-8">
+              <div className="mb-8 min-h-[160px]">
                 <h3 className="text-xl font-bold mb-2 text-black/80">Free</h3>
                 <div className="flex items-baseline gap-1">
                   <span className="text-5xl font-bold tracking-tight">$0</span>
@@ -204,7 +204,7 @@ export default function Home() {
 
               <Link
                 href="#hero"
-                className="w-full py-4 bg-gray-50 text-black border border-black/5 rounded-xl font-bold hover:bg-gray-100 transition-all flex items-center justify-center gap-2 mb-8 group"
+                className="w-full py-4 bg-gray-50 text-black border border-black/5 rounded-xl font-bold hover:bg-gray-100 transition-all flex items-center justify-center gap-2 mb-12 group"
               >
                 <Download
                   size={18}
@@ -213,7 +213,7 @@ export default function Home() {
                 Download Free
               </Link>
 
-              <div className="mt-auto space-y-4">
+              <div className="space-y-4">
                 <p className="text-xs font-bold text-black/40 uppercase tracking-widest">
                   What&apos;s included
                 </p>
@@ -236,7 +236,7 @@ export default function Home() {
                 LIFETIME ACCESS
               </div>
 
-              <div className="relative mb-8">
+              <div className="relative mb-8 min-h-[160px]">
                 <h3 className="text-xl font-bold mb-2 text-amber-500">
                   Pro License
                 </h3>
@@ -263,13 +263,13 @@ export default function Home() {
                 href={LEMONSQUEEZY_CHECKOUT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative w-full py-4 bg-amber-500 text-black rounded-xl font-bold hover:bg-amber-400 transition-all flex items-center justify-center gap-2 mb-8 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:-translate-y-0.5"
+                className="relative w-full py-4 bg-amber-500 text-black rounded-xl font-bold hover:bg-amber-400 transition-all flex items-center justify-center gap-2 mb-12 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:-translate-y-0.5"
               >
                 <Sparkles size={18} />
                 Get Lifetime Access
               </Link>
 
-              <div className="relative mt-auto space-y-4">
+              <div className="relative space-y-4">
                 <p className="text-xs font-bold text-white/40 uppercase tracking-widest">
                   Everything in Free, plus
                 </p>
