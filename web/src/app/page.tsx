@@ -1,12 +1,14 @@
 import Link from "next/link";
 import {
   Download,
-  Moon,
   Monitor,
   Mail,
-  Zap,
   Check,
   Sparkles,
+  Timer,
+  Headphones,
+  Shield,
+  LayoutTemplate,
 } from "lucide-react";
 import DemoPlayer from "../components/DemoPlayer";
 import DownloadButton from "../components/DownloadButton";
@@ -131,27 +133,44 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Features Grid */}
+      {/* Value/Features Section */}
       <section
         id="features"
-        className="py-24 border-t border-black/5 bg-gray-50"
+        className="py-32 border-t border-black/5 bg-gray-50/50"
       >
         <div className="container mx-auto px-6">
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="text-center mb-20">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 font-serif">
+              Everything you need to focus.
+              <br />
+              <span className="text-black/40">Nothing you don&apos;t.</span>
+            </h2>
+            <p className="text-lg text-black/60 max-w-2xl mx-auto">
+              ZeroHz combines high-fidelity audio with powerful productivity
+              tools, all wrapped in a distraction-free interface.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <FeatureCard
-              icon={<Zap />}
-              title="One-Click Serenity"
-              description="Instantly accessible from your menu bar. No accounts, no ads, just pure focus."
+              icon={<Headphones />}
+              title="Curated Soundscapes"
+              description="Rain, waves, white noise, and more. High-quality ambient sounds mixed to perfection to help you find your flow instantly."
             />
             <FeatureCard
-              icon={<Moon />}
-              title="Seamless Design"
-              description="Native look and feel that adapts perfectly to your system's light or dark mode."
+              icon={<Timer />}
+              title="Smart Focus Timer"
+              description="Stay on track with the built-in timer. Set your focus duration, track your sessions, and build a consistent deep work habit."
             />
             <FeatureCard
-              icon={<Monitor />}
-              title="Offline Ready"
-              description="Built with Tauri for maximum performance. Works completely offline without internet."
+              icon={<LayoutTemplate />}
+              title="Menu Bar Native"
+              description="Designed to be invisible until you need it. Control playback, switch sounds, and manage timers directly from your menu bar."
+            />
+            <FeatureCard
+              icon={<Shield />}
+              title="Privacy First & Offline"
+              description="ZeroHz works completely offline. No account required, no tracking, and no data collection. Your focus is your business."
             />
           </div>
         </div>
@@ -344,12 +363,16 @@ function FeatureCard({
   description: string;
 }) {
   return (
-    <div className="p-8 rounded-2xl bg-white border border-black/5 shadow-sm hover:shadow-md transition-all">
-      <div className="w-12 h-12 rounded-xl bg-black/5 flex items-center justify-center mb-6 text-black">
+    <div className="group p-8 rounded-2xl bg-white border border-black/5 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+      <div className="w-12 h-12 rounded-xl bg-black/5 group-hover:bg-black group-hover:text-white transition-colors flex items-center justify-center mb-6 text-black">
         {icon}
       </div>
-      <h3 className="text-xl font-bold mb-3">{title}</h3>
-      <p className="text-black/60 leading-relaxed">{description}</p>
+      <h3 className="text-xl font-bold mb-3 group-hover:text-black transition-colors">
+        {title}
+      </h3>
+      <p className="text-black/60 leading-relaxed group-hover:text-black/70 transition-colors">
+        {description}
+      </p>
     </div>
   );
 }
