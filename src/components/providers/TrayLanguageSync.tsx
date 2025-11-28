@@ -8,6 +8,7 @@ import { listen } from "@tauri-apps/api/event";
 interface TrayLabels {
   show_window: string;
   session_history: string;
+  usage: string;
   start_at_login: string;
   activate_license: string;
   language: string;
@@ -23,6 +24,7 @@ export default function TrayLanguageSync() {
     const labels: TrayLabels = {
       show_window: t("tray.showWindow"),
       session_history: t("tray.sessionHistory"),
+      usage: t("tray.usage"),
       start_at_login: t("tray.startAtLogin"),
       activate_license: t("tray.activateLicense"),
       language: t("tray.language"),

@@ -12,6 +12,7 @@ struct TrayMenuState<R: Runtime> {
   en: CheckMenuItem<R>,
   show_window: CheckMenuItem<R>,
   session_history: MenuItem<R>,
+  usage: MenuItem<R>,
   autostart: CheckMenuItem<R>,
   activate_license: MenuItem<R>,
   language_submenu: Submenu<R>,
@@ -29,6 +30,7 @@ fn sync_language_tray<R: Runtime>(_app: tauri::AppHandle<R>, state: tauri::State
 struct TrayLabels {
   show_window: String,
   session_history: String,
+  usage: String,
   start_at_login: String,
   activate_license: String,
   language: String,
@@ -40,6 +42,7 @@ struct TrayLabels {
 fn update_tray_menu<R: Runtime>(_app: tauri::AppHandle<R>, state: tauri::State<TrayMenuState<R>>, labels: TrayLabels) {
   let _ = state.show_window.set_text(&labels.show_window);
   let _ = state.session_history.set_text(&labels.session_history);
+  let _ = state.usage.set_text(&labels.usage);
   let _ = state.autostart.set_text(&labels.start_at_login);
   let _ = state.activate_license.set_text(&labels.activate_license);
   let _ = state.language_submenu.set_text(&labels.language);
@@ -150,6 +153,9 @@ pub fn run() {
       let session_history_item = MenuItemBuilder::new("Session History")
         .build(app)?;
 
+      let usage_item = MenuItemBuilder::new("Usage")
+        .build(app)?;
+
       let separator1 = PredefinedMenuItem::separator(app)?;
 
       // === Settings ===
@@ -192,6 +198,7 @@ pub fn run() {
       let activate_license_id = activate_license_item.id().clone();
       let show_window_id = show_window_item.id().clone();
       let session_history_id = session_history_item.id().clone();
+      let usage_id = usage_item.id().clone();
       let quit_id = quit_item.id().clone();
       let lang_ko_id = lang_ko_item.id().clone();
       let lang_en_id = lang_en_item.id().clone();
@@ -202,6 +209,7 @@ pub fn run() {
           // Primary Actions
           &show_window_item,
           &session_history_item,
+          &usage_item,
           &separator1,
           // Settings
           &autostart_item,
@@ -223,6 +231,7 @@ pub fn run() {
         en: lang_en_item.clone(),
         show_window: show_window_item.clone(),
         session_history: session_history_item.clone(),
+        usage: usage_item.clone(),
         autostart: autostart_item.clone(),
         activate_license: activate_license_item.clone(),
         language_submenu: language_submenu.clone(),
@@ -376,6 +385,13 @@ pub fn run() {
               let _ = window.show();
               let _ = window.set_focus();
               let _ = window.emit("open-license-input", ());
+            }
+          } else if event.id == usage_id {
+            // Show window and emit event to open usage modal
+            if let Some(window) = app.get_webview_window("main") {
+              let _ = window.show();
+              let _ = window.set_focus();
+              let _ = window.emit("open-usage", ());
             }
           } else if event.id == lang_ko_id {
             let _ = app.emit("change-language", "ko");

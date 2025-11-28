@@ -105,6 +105,7 @@
   "tray": {
     "showWindow": "Show Window",
     "sessionHistory": "Session History",
+    "usage": "Usage",
     "startAtLogin": "Start at Login",
     "activateLicense": "Activate License",
     "proActivated": "Pro ✓",
@@ -133,5 +134,24 @@
     "haveLicense": "Already have a license key?",
     "buyLicense": "Buy a license",
     "availableInPro": "Available in Pro"
+  },
+  "usage": {
+    "title": "Usage",
+    "hours": "h",
+    "minutes": "m",
+    "playbackTime": "Today's Playback Time",
+    "timerTrial": "Timer Free Trial",
+    "times": "times",
+    "remainingTime": "Remaining: {{time}}",
+    "limitReached": "Daily limit reached",
+    "remainingTrials": "{{count}} remaining",
+    "trialLimitReached": "Trial limit reached",
+    "proUnlimited": "Unlimited Access",
+    "proDescription": "You're enjoying all features without limits as a Pro member.",
+    "upgradeTitle": "Upgrade to Pro",
+    "unlimitedPlaytime": "Unlimited playtime",
+    "unlimitedTimer": "Unlimited timer",
+    "advancedAnalytics": "Advanced analytics",
+    "upgradeButton": "Get Pro"
   }
 }
