@@ -259,6 +259,11 @@ export default function Home() {
             <ReleaseItem
               version="v0.2.1"
               date="November 27, 2025"
+              changes={["Bug fixes and stability improvements"]}
+            />
+            <ReleaseItem
+              version="v0.2.0"
+              date="November 27, 2025"
               changes={[
                 "Added focus timer with stopwatch and countdown modes",
                 "Session history tracking with statistics",
@@ -266,7 +271,7 @@ export default function Home() {
               ]}
             />
             <ReleaseItem
-              version="v0.1.0 - v0.1.29"
+              version="v0.1.0 - v0.1.30"
               date="November 23 - 26, 2025"
               changes={[
                 "Initial release with basic white noise player functionality",
