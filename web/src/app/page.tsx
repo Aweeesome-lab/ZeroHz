@@ -309,6 +309,16 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
+              version="v0.2.2"
+              date="November 28, 2025"
+              changes={[
+                "Added Usage Modal to track daily playtime and timer trial usage",
+                "Visual progress bars showing free tier limits",
+                "Auto-stop all sounds when daily limit is reached",
+                "Direct access to usage stats from tray menu",
+              ]}
+            />
+            <ReleaseItem
               version="v0.2.1"
               date="November 27, 2025"
               changes={["Bug fixes and stability improvements"]}

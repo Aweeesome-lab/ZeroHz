@@ -18,6 +18,7 @@ import { ExpandedView } from "./ExpandedView";
 import { SessionHistoryModal } from "./SessionHistoryModal";
 import { ProUpgradeModal } from "./ProUpgradeModal";
 import { LicenseInputModal } from "./LicenseInputModal";
+import { UsageModal } from "./UsageModal";
 import { trackEvent } from "@/lib/analytics";
 import {
   playTimerCompleteSound,
@@ -36,6 +37,7 @@ function FloatingBarContent() {
   const [showSessionHistory, setShowSessionHistory] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showLicenseModal, setShowLicenseModal] = useState(false);
+  const [showUsageModal, setShowUsageModal] = useState(false);
 
   // Pro 상태 관리
   const pro = usePro();
@@ -132,10 +134,11 @@ function FloatingBarContent() {
     currentTaskDescriptionRef.current = currentTaskDescription;
   }, [currentTaskDescription]);
 
-  // Tauri 이벤트 리스너 (트레이 메뉴에서 세션 기록/라이센스 열기)
+  // Tauri 이벤트 리스너 (트레이 메뉴에서 세션 기록/라이센스/이용현황 열기)
   useEffect(() => {
     let unlistenSessionHistory: (() => void) | undefined;
     let unlistenLicenseInput: (() => void) | undefined;
+    let unlistenUsage: (() => void) | undefined;
 
     const setupListeners = async () => {
       try {
@@ -145,6 +148,9 @@ function FloatingBarContent() {
         });
         unlistenLicenseInput = await listen("open-license-input", () => {
           setShowLicenseModal(true);
+        });
+        unlistenUsage = await listen("open-usage", () => {
+          setShowUsageModal(true);
         });
       } catch {
         // 웹 환경에서는 무시
@@ -156,6 +162,7 @@ function FloatingBarContent() {
     return () => {
       unlistenSessionHistory?.();
       unlistenLicenseInput?.();
+      unlistenUsage?.();
     };
   }, []);
 
@@ -223,8 +230,13 @@ function FloatingBarContent() {
       playtimeIntervalRef.current = setInterval(() => {
         pro.trackPlaytime(1);
 
-        // 제한 도달 시 모달 표시
+        // 제한 도달 시 모든 사운드 비활성화 및 모달 표시
         if (!pro.canPlay()) {
+          // 모든 활성화된 사운드 비활성화
+          activeSounds.forEach((soundId) => {
+            audioToggleSound(soundId);
+          });
+
           setUpgradeReason("playtime");
           setShowUpgradeModal(true);
         }
@@ -237,7 +249,7 @@ function FloatingBarContent() {
         playtimeIntervalRef.current = null;
       }
     };
-  }, [pro.isPro, activeSounds.size, pro]);
+  }, [pro.isPro, activeSounds.size, pro, activeSounds, audioToggleSound]);
 
   // 미완료 세션 기록 (리셋, 모드 전환 시 호출)
   const recordIncompleteSession = useCallback(() => {
@@ -419,6 +431,7 @@ function FloatingBarContent() {
           stats={stats}
           onClose={() => setShowSessionHistory(false)}
           onClear={clearSessions}
+          isPro={pro.isPro}
         />
       )}
 
@@ -447,6 +460,11 @@ function FloatingBarContent() {
           onActivate={pro.activateLicenseKey}
           onClose={() => setShowLicenseModal(false)}
         />
+      )}
+
+      {/* 이용 현황 모달 */}
+      {showUsageModal && (
+        <UsageModal onClose={() => setShowUsageModal(false)} />
       )}
     </div>
   );

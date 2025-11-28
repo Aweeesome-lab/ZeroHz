@@ -105,6 +105,7 @@
   "tray": {
     "showWindow": "창 보기",
     "sessionHistory": "세션 기록",
+    "usage": "이용 현황",
     "startAtLogin": "로그인 시 시작",
     "activateLicense": "라이센스 활성화",
     "proActivated": "Pro ✓",
@@ -133,5 +134,24 @@
     "haveLicense": "이미 라이센스 키가 있으신가요?",
     "buyLicense": "라이센스 구매하기",
     "availableInPro": "Pro 이용 가능"
+  },
+  "usage": {
+    "title": "이용 현황",
+    "hours": "시간",
+    "minutes": "분",
+    "playbackTime": "오늘 재생 시간",
+    "timerTrial": "타이머 무료 체험",
+    "times": "회",
+    "remainingTime": "남은 시간: {{time}}",
+    "limitReached": "오늘 무료 시간이 종료되었습니다",
+    "remainingTrials": "{{count}}회 남음",
+    "trialLimitReached": "무료 체험이 종료되었습니다",
+    "proUnlimited": "무제한 이용 중",
+    "proDescription": "Pro 회원으로 모든 기능을 제한 없이 즐기고 계십니다.",
+    "upgradeTitle": "Pro로 업그레이드",
+    "unlimitedPlaytime": "무제한 재생 시간",
+    "unlimitedTimer": "무제한 타이머 사용",
+    "advancedAnalytics": "고급 데이터 분석",
+    "upgradeButton": "Pro 구매하기"
   }
 }

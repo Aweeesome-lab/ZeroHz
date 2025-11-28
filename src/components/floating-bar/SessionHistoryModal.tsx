@@ -215,14 +215,16 @@ export function SessionHistoryModal({
         } = await import("@tauri-apps/api/window");
         const appWindow = getCurrentWindow();
 
-        // 현재 크기 및 위치 저장
-        const currentSize = await appWindow.innerSize();
+        // 현재 크기 및 위치 저장 (outerSize는 PhysicalSize를 반환)
+        const currentSize = await appWindow.outerSize();
         const currentPos = await appWindow.outerPosition();
 
+        // PhysicalSize로 저장
         originalSizeRef.current = {
           width: currentSize.width,
           height: currentSize.height,
         };
+        // PhysicalPosition으로 저장
         originalPositionRef.current = {
           x: currentPos.x,
           y: currentPos.y,
@@ -274,7 +276,7 @@ export function SessionHistoryModal({
               )
             );
 
-            // 위치 복원
+            // 위치 복원 (저장된 위치는 PhysicalPosition)
             await appWindow.setPosition(
               new PhysicalPosition(
                 originalPositionRef.current.x,
