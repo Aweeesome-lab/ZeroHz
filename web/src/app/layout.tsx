@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { CSPostHogProvider } from "./providers";
+import { UpdateNotification } from "@/components/UpdateNotification";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -56,6 +57,7 @@ export default function RootLayout({
       >
         <CSPostHogProvider>
           {children}
+          <UpdateNotification />
           <Analytics />
         </CSPostHogProvider>
       </body>

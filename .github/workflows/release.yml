@@ -75,8 +75,8 @@ jobs:
       - name: Check Secrets
         shell: bash
         env:
-          PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-          KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY || secrets.TAURI_PRIVATE_KEY }}
+          KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || secrets.TAURI_KEY_PASSWORD }}
         run: |
           if [ -z "$PRIVATE_KEY" ]; then
             echo "::error::TAURI_PRIVATE_KEY is empty or missing!"
@@ -95,8 +95,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY || secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD || secrets.TAURI_KEY_PASSWORD }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
@@ -173,22 +173,12 @@ jobs:
               echo "Found signature: $SIG_PATH"
               cp "$SIG_PATH" updater_data/signature.txt
             else
-              echo "::warning::Signature file not found at $SIG_PATH"
-              echo "This may indicate an issue with the Tauri signing configuration."
-              echo "Listing directory contents for debugging:"
-              find src-tauri/target/release/bundle -maxdepth 3 2>/dev/null || true
+              echo "::error::Signature file not found at $SIG_PATH"
+              echo "This indicates that the Tauri build failed to sign the update."
+              echo "Check that TAURI_SIGNING_PRIVATE_KEY (or TAURI_PRIVATE_KEY) is correctly set in Secrets."
               
-              # Check if signing key was present during build
-              if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
-                echo "::error::TAURI_SIGNING_PRIVATE_KEY was not set during build"
-              else
-                echo "TAURI_SIGNING_PRIVATE_KEY was set (length check passed)"
-              fi
-              
-              # Create a placeholder signature to avoid downstream errors
-              # This is a temporary workaround - the real issue needs investigation
-              echo "SIGNATURE_MISSING_SEE_BUILD_LOGS" > updater_data/signature.txt
-              echo "::warning::Created placeholder signature. Update functionality may not work correctly."
+              # Fail the build to prevent deploying a broken update
+              exit 1
             fi
             
           else

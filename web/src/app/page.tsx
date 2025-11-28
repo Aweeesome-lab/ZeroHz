@@ -309,6 +309,15 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
+              version="v0.2.3"
+              date="November 28, 2025"
+              changes={[
+                "Automatic updates are back on the stable channel (secure download & install)",
+                "In-app update banner lets you install new versions without leaving the app",
+                "Stronger signature checks to prevent broken or unsigned update builds",
+              ]}
+            />
+            <ReleaseItem
               version="v0.2.2"
               date="November 28, 2025"
               changes={[

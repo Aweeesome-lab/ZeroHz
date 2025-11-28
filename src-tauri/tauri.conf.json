@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "ZeroHz",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "identifier": "com.zerohz.app",
   "build": {
     "frontendDist": "../out",
@@ -66,6 +66,8 @@
   "bundle": {
     "active": true,
     "targets": ["dmg", "app", "nsis"],
+    "createUpdaterArtifacts": true,
+    "resources": ["../out"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

@@ -1,11 +1,20 @@
+use std::sync::Mutex;
 use tauri::{
   menu::{Menu, MenuItem, MenuItemBuilder, PredefinedMenuItem, CheckMenuItemBuilder, CheckMenuItem, Submenu},
   tray::TrayIconBuilder,
-  Emitter, Manager, PhysicalPosition,
-  Runtime,
+  Emitter, Manager, PhysicalPosition, Runtime, Wry,
 };
 use tauri_plugin_autostart::ManagerExt;
 use tauri_plugin_updater::UpdaterExt;
+use tauri_plugin_process::init as process_init;
+
+#[derive(Clone)]
+enum UpdateState {
+  Checking,
+  Available(String),
+  Latest(String),
+  Failed,
+}
 
 struct TrayMenuState<R: Runtime> {
   ko: CheckMenuItem<R>,
@@ -17,13 +26,37 @@ struct TrayMenuState<R: Runtime> {
   activate_license: MenuItem<R>,
   language_submenu: Submenu<R>,
   check_update: MenuItem<R>,
+  update_status: MenuItem<R>,
+  version_item: MenuItem<R>,
   quit: MenuItem<R>,
+  current_lang: Mutex<String>,
+  update_state: Mutex<UpdateState>,
+  version_str: String,
 }
 
 #[tauri::command]
 fn sync_language_tray<R: Runtime>(_app: tauri::AppHandle<R>, state: tauri::State<TrayMenuState<R>>, lang: String) {
   let _ = state.ko.set_checked(lang == "ko");
   let _ = state.en.set_checked(lang == "en");
+  let current_lang = {
+    let mut guard = state.current_lang.lock().unwrap_or_else(|_| panic!("current_lang poisoned"));
+    *guard = lang;
+    guard.clone()
+  };
+
+  // Localize version label
+  let version_label = if current_lang.as_str() == "ko" {
+    format!("버전 {}", state.version_str)
+  } else {
+    format!("Version {}", state.version_str)
+  };
+  let _ = state.version_item.set_text(&version_label);
+
+  // Re-apply update status for new language (avoid double-locking)
+  if let Some(st) = state.update_state.lock().ok().map(|s| s.clone()) {
+    let locale = get_update_locale(&current_lang);
+    apply_update_state(&state, &locale, st);
+  }
 }
 
 #[derive(serde::Deserialize)]
@@ -56,6 +89,106 @@ fn sync_pro_status<R: Runtime>(_app: tauri::AppHandle<R>, state: tauri::State<Tr
   let _ = state.activate_license.set_enabled(!is_pro);
 }
 
+struct UpdateLocale<'a> {
+  title_available: &'a str,
+  message_available: &'a str,
+  button_install: &'a str,
+  button_later: &'a str,
+  title_ready: &'a str,
+  message_ready: &'a str,
+  title_error_download: &'a str,
+  message_error_download: &'a str,
+  title_error_check: &'a str,
+  message_error_check: &'a str,
+  title_no_update: &'a str,
+  message_no_update: &'a str,
+  title_init_error: &'a str,
+  message_init_error: &'a str,
+  status_checking: &'a str,
+  status_available: &'a str,
+  status_latest: &'a str,
+  status_failed: &'a str,
+  install_menu_label: &'a str,
+  check_menu_label: &'a str,
+  retry_menu_label: &'a str,
+}
+
+fn get_update_locale(lang: &str) -> UpdateLocale<'static> {
+  match lang {
+    "ko" => UpdateLocale {
+      title_available: "업데이트 가능",
+      message_available: "새 버전 {version}이 준비되었습니다. 지금 다운로드하고 설치할까요?",
+      button_install: "설치",
+      button_later: "나중에",
+      title_ready: "업데이트 완료",
+      message_ready: "업데이트가 설치되었습니다. ZeroHz를 다시 시작합니다.",
+      title_error_download: "업데이트 오류",
+      message_error_download: "업데이트 다운로드/설치에 실패했습니다. 다시 시도해 주세요.",
+      title_error_check: "업데이트 확인 실패",
+      message_error_check: "업데이트 확인에 실패했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.",
+      title_no_update: "최신 버전입니다",
+      message_no_update: "이미 최신 버전(v{version})을 사용 중입니다.",
+      title_init_error: "업데이트 초기화 실패",
+      message_init_error: "업데이트 모듈을 초기화하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+      status_checking: "… 업데이트 확인 중",
+      status_available: "⬆ 업데이트 가능: v{version}",
+      status_latest: "✓ 최신 버전",
+      status_failed: "⚠ 업데이트 확인 실패",
+      install_menu_label: "업데이트 설치 (v{version})",
+      check_menu_label: "업데이트 확인",
+      retry_menu_label: "업데이트 다시 확인",
+    },
+    _ => UpdateLocale {
+      title_available: "Update Available",
+      message_available: "New version {version} is available. Download and install now?",
+      button_install: "Install",
+      button_later: "Later",
+      title_ready: "Update Ready",
+      message_ready: "Update installed. ZeroHz will restart to apply it.",
+      title_error_download: "Update Error",
+      message_error_download: "Failed to download or install the update. Please try again.",
+      title_error_check: "Update Check Failed",
+      message_error_check: "Failed to check for updates. Please check your connection and try again.",
+      title_no_update: "No Updates Available",
+      message_no_update: "You are already running the latest version (v{version}).",
+      title_init_error: "Updater Error",
+      message_init_error: "Failed to initialize the updater. Please try again later.",
+      status_checking: "… Checking for updates",
+      status_available: "⬆ Update available: v{version}",
+      status_latest: "✓ Up to date",
+      status_failed: "⚠ Update check failed",
+      install_menu_label: "Install update (v{version})",
+      check_menu_label: "Check for Updates",
+      retry_menu_label: "Retry update check",
+    },
+  }
+}
+
+fn apply_update_state<R: Runtime>(state: &TrayMenuState<R>, locale: &UpdateLocale<'_>, new_state: UpdateState) {
+  if let Ok(mut st) = state.update_state.lock() {
+    *st = new_state.clone();
+  }
+
+  match new_state {
+    UpdateState::Checking => {
+      let _ = state.update_status.set_text(locale.status_checking);
+      let _ = state.check_update.set_text(locale.check_menu_label);
+    }
+    UpdateState::Available(v) => {
+      let _ = state.update_status.set_text(locale.status_available.replace("{version}", &v));
+      let _ = state.check_update.set_text(locale.install_menu_label.replace("{version}", &v));
+    }
+    UpdateState::Latest(v) => {
+      let _ = state.update_status.set_text(locale.status_latest.replace("{version}", &v));
+      let _ = state.check_update.set_text(locale.check_menu_label);
+    }
+    UpdateState::Failed => {
+      let _ = state.update_status.set_text(locale.status_failed);
+      let _ = state.check_update.set_text(locale.retry_menu_label);
+    }
+  }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
@@ -65,6 +198,7 @@ pub fn run() {
     ))
     .plugin(tauri_plugin_updater::Builder::new().build())
     .plugin(tauri_plugin_dialog::init())
+    .plugin(process_init())
     .plugin(tauri_plugin_store::Builder::default().build())
     .plugin(tauri_plugin_opener::init())
     .plugin(tauri_plugin_posthog::init(
@@ -185,6 +319,9 @@ pub fn run() {
 
       let check_update_item = MenuItemBuilder::new("Check for Updates")
         .build(app)?;
+      let update_status_item = MenuItemBuilder::new("Update status")
+        .enabled(false)
+        .build(app)?;
 
       let separator3 = PredefinedMenuItem::separator(app)?;
 
@@ -217,6 +354,7 @@ pub fn run() {
           &language_submenu,
           &separator2,
           // App Info
+          &update_status_item,
           &version_item,
           &check_update_item,
           &separator3,
@@ -236,7 +374,12 @@ pub fn run() {
         activate_license: activate_license_item.clone(),
         language_submenu: language_submenu.clone(),
         check_update: check_update_item.clone(),
+        update_status: update_status_item.clone(),
+        version_item: version_item.clone(),
         quit: quit_item.clone(),
+        current_lang: Mutex::new("en".to_string()),
+        update_state: Mutex::new(UpdateState::Latest(version.to_string())),
+        version_str: version.to_string(),
       });
 
       // Load and decode the tray icon PNG
@@ -256,6 +399,15 @@ pub fn run() {
             println!("Checking for updates...");
             let app_handle = app.clone();
             tauri::async_runtime::spawn(async move {
+              let lang = app_handle
+                .try_state::<TrayMenuState<Wry>>()
+                .and_then(|state| state.current_lang.lock().ok().map(|l| l.clone()))
+                .unwrap_or_else(|| "en".to_string());
+              let locale = get_update_locale(&lang);
+              if let Some(state) = app_handle.try_state::<TrayMenuState<Wry>>() {
+                apply_update_state(&state, &locale, UpdateState::Checking);
+              }
+
               match app_handle.updater() {
                 Ok(updater) => {
                   match updater.check().await {
@@ -263,13 +415,19 @@ pub fn run() {
                       if let Some(update) = update_response {
                         println!("Update available: version {}", update.version);
                         println!("Download URL: {}", update.download_url);
+                        if let Some(state) = app_handle.try_state::<TrayMenuState<Wry>>() {
+                          apply_update_state(&state, &locale, UpdateState::Available(update.version.clone()));
+                        }
                         
                         // Show dialog to user about available update
                         use tauri_plugin_dialog::{DialogExt, MessageDialogKind, MessageDialogButtons};
                         let confirmed = app_handle.dialog()
-                          .message(format!("New version {} is available. Would you like to download and install it?", update.version))
-                          .title("Update Available")
-                          .buttons(MessageDialogButtons::OkCancelCustom("Install".to_string(), "Later".to_string()))
+                          .message(locale.message_available.replace("{version}", &update.version))
+                          .title(locale.title_available)
+                          .buttons(MessageDialogButtons::OkCancelCustom(
+                            locale.button_install.to_string(),
+                            locale.button_later.to_string()
+                          ))
                           .blocking_show();
                         
                         if confirmed {
@@ -283,19 +441,19 @@ pub fn run() {
                             println!("Download complete, preparing to install...");
                           }).await {
                             Ok(_) => {
-                              println!("Update installed successfully. Restart the app to apply.");
-                              // Notify user that update is ready
+                              println!("Update installed successfully. Restarting app to apply.");
                               app_handle.dialog()
-                                .message("Update installed successfully! Please restart ZeroHz to apply the update.")
-                                .title("Update Ready")
+                                .message(locale.message_ready)
+                                .title(locale.title_ready)
                                 .kind(MessageDialogKind::Info)
                                 .blocking_show();
+                              app_handle.request_restart();
                             }
                             Err(e) => {
                               println!("Failed to download/install update: {:?}", e);
                               app_handle.dialog()
-                                .message("Failed to download or install the update. Please try again later.")
-                                .title("Update Error")
+                                .message(locale.message_error_download)
+                                .title(locale.title_error_download)
                                 .kind(MessageDialogKind::Error)
                                 .blocking_show();
                             }
@@ -303,21 +461,27 @@ pub fn run() {
                         }
                       } else {
                         println!("No updates available");
+                        if let Some(state) = app_handle.try_state::<TrayMenuState<Wry>>() {
+                          apply_update_state(&state, &locale, UpdateState::Latest(env!("CARGO_PKG_VERSION").to_string()));
+                        }
                         // Notify user that app is up to date
                         use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
                         app_handle.dialog()
-                          .message(format!("You are already running the latest version (v{}).", env!("CARGO_PKG_VERSION")))
-                          .title("No Updates Available")
+                          .message(locale.message_no_update.replace("{version}", env!("CARGO_PKG_VERSION")))
+                          .title(locale.title_no_update)
                           .kind(MessageDialogKind::Info)
                           .blocking_show();
                       }
                     }
                     Err(e) => {
                       println!("Failed to check for updates: {:?}", e);
+                      if let Some(state) = app_handle.try_state::<TrayMenuState<Wry>>() {
+                        apply_update_state(&state, &locale, UpdateState::Failed);
+                      }
                       use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
                       app_handle.dialog()
-                        .message("Failed to check for updates. Please check your internet connection and try again.")
-                        .title("Update Check Failed")
+                        .message(locale.message_error_check)
+                        .title(locale.title_error_check)
                         .kind(MessageDialogKind::Error)
                         .blocking_show();
                     }
@@ -325,10 +489,13 @@ pub fn run() {
                 }
                 Err(e) => {
                   println!("Failed to initialize updater: {:?}", e);
+                  if let Some(state) = app_handle.try_state::<TrayMenuState<Wry>>() {
+                    apply_update_state(&state, &locale, UpdateState::Failed);
+                  }
                   use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
                   app_handle.dialog()
-                    .message("Failed to initialize the updater. Please try again later.")
-                    .title("Updater Error")
+                    .message(locale.message_init_error)
+                    .title(locale.title_init_error)
                     .kind(MessageDialogKind::Error)
                     .blocking_show();
                 }
@@ -426,6 +593,45 @@ pub fn run() {
           }
         })
         .build(app)?;
+
+      // Initial background update check to surface status in tray without user interaction
+      let app_handle_for_status = app.app_handle();
+      let app_handle_for_status = app_handle_for_status.clone();
+      tauri::async_runtime::spawn(async move {
+        let lang = app_handle_for_status
+          .try_state::<TrayMenuState<Wry>>()
+          .and_then(|state| state.current_lang.lock().ok().map(|l| l.clone()))
+          .unwrap_or_else(|| "en".to_string());
+        let locale = get_update_locale(&lang);
+
+        if let Some(state) = app_handle_for_status.try_state::<TrayMenuState<Wry>>() {
+          apply_update_state(&state, &locale, UpdateState::Checking);
+        }
+
+        match app_handle_for_status.updater() {
+          Ok(updater) => match updater.check().await {
+            Ok(update_response) => {
+              if let Some(update) = update_response {
+                if let Some(state) = app_handle_for_status.try_state::<TrayMenuState<Wry>>() {
+                  apply_update_state(&state, &locale, UpdateState::Available(update.version.clone()));
+                }
+              } else if let Some(state) = app_handle_for_status.try_state::<TrayMenuState<Wry>>() {
+                apply_update_state(&state, &locale, UpdateState::Latest(env!("CARGO_PKG_VERSION").to_string()));
+              }
+            }
+            Err(_) => {
+              if let Some(state) = app_handle_for_status.try_state::<TrayMenuState<Wry>>() {
+                apply_update_state(&state, &locale, UpdateState::Failed);
+              }
+            }
+          },
+          Err(_) => {
+            if let Some(state) = app_handle_for_status.try_state::<TrayMenuState<Wry>>() {
+              apply_update_state(&state, &locale, UpdateState::Failed);
+            }
+          }
+        }
+      });
 
       app.handle().plugin(
         tauri_plugin_log::Builder::default()
