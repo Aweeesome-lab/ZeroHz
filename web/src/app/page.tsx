@@ -240,16 +240,16 @@ export default function Home() {
                 <h3 className="text-xl font-bold mb-2 text-amber-500">
                   Pro License
                 </h3>
-                <div className="flex items-baseline gap-3">
-                  <span className="text-5xl font-bold tracking-tight">
-                    $9.99
+                <div className="flex flex-col gap-1">
+                  <span className="text-white/40 line-through text-sm decoration-white/20">
+                    $12.99
                   </span>
-                  <div className="flex flex-col items-start">
-                    <span className="text-white/40 line-through text-lg decoration-white/20">
-                      $12.99
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-5xl font-bold tracking-tight">
+                      $9.99
                     </span>
-                    <span className="text-amber-500/80 text-xs font-medium">
-                      One-time payment
+                    <span className="text-amber-500/80 text-sm font-medium">
+                      / one-time
                     </span>
                   </div>
                 </div>
