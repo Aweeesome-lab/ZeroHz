@@ -257,7 +257,7 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
-              version="v0.1.30"
+              version="v0.2.1"
               date="November 27, 2025"
               changes={[
                 "Added focus timer with stopwatch and countdown modes",
