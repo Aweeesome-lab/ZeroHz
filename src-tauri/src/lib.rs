@@ -107,6 +107,15 @@ pub fn run() {
           let _: () = msg_send![ns_window, setBackgroundColor: &*bg_color];
           let _: () = msg_send![ns_window, setOpaque: false];
           
+          // Set corner radius for rounded window
+          let content_view: *mut AnyObject = msg_send![ns_window, contentView];
+          // Enable layer-backing for the content view
+          let _: () = msg_send![content_view, setWantsLayer: true];
+          let layer: *mut AnyObject = msg_send![content_view, layer];
+          let corner_radius: f64 = 16.0;
+          let _: () = msg_send![layer, setCornerRadius: corner_radius];
+          let _: () = msg_send![layer, setMasksToBounds: true];
+          
           // Make window appear on all desktop spaces (Spaces)
           // NSWindowCollectionBehaviorCanJoinAllSpaces (1)
           // NSWindowCollectionBehaviorStationary (16) - stays on screen when switching spaces

@@ -30,10 +30,25 @@
       "total": "Total Sessions",
       "completionRate": "Completion Rate",
       "focusTime": "Total Focus Time",
-      "todayFocusTime": "Today"
+      "todayFocusTime": "Today",
+      "today": "Today"
     },
     "chart": {
-      "week": "Last 7 Days"
+      "week": "Last 7 Days",
+      "activeHours": "Active Hours",
+      "less": "Less",
+      "more": "More",
+      "total": "Total",
+      "all": "All",
+      "days": {
+        "sun": "Sun",
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat"
+      }
     },
     "empty": "No sessions yet",
     "date": {
@@ -116,6 +131,7 @@
     "invalidLicense": "Invalid license key",
     "activated": "Pro activated",
     "haveLicense": "Already have a license key?",
-    "buyLicense": "Buy a license"
+    "buyLicense": "Buy a license",
+    "availableInPro": "Available in Pro"
   }
 }

@@ -36,28 +36,57 @@ export function TimerSettingsModal({
   const originalSizeRef = useRef<{ width: number; height: number } | null>(
     null
   );
+  const originalPositionRef = useRef<{ x: number; y: number } | null>(null);
 
-  // 모달 열릴 때 윈도우 크기 확장
+  // 모달 열릴 때 윈도우 크기 확장 및 중앙 배치
   useEffect(() => {
     const expandWindow = async () => {
       try {
-        const { getCurrentWindow, LogicalSize } = await import(
-          "@tauri-apps/api/window"
-        );
+        const {
+          getCurrentWindow,
+          LogicalSize,
+          PhysicalPosition,
+          currentMonitor,
+        } = await import("@tauri-apps/api/window");
         const appWindow = getCurrentWindow();
 
-        // 현재 크기 저장
-        const currentSize = await appWindow.innerSize();
+        // 현재 크기 및 위치 저장 (outerSize는 PhysicalSize를 반환)
+        const currentSize = await appWindow.outerSize();
+        const currentPos = await appWindow.outerPosition();
+
+        // PhysicalSize로 저장
         originalSizeRef.current = {
           width: currentSize.width,
           height: currentSize.height,
+        };
+        // PhysicalPosition으로 저장
+        originalPositionRef.current = {
+          x: currentPos.x,
+          y: currentPos.y,
         };
 
         // 모달 크기로 확장
         await appWindow.setSize(
           new LogicalSize(MODAL_WINDOW_SIZE.width, MODAL_WINDOW_SIZE.height)
         );
-      } catch (error) {
+
+        // 화면 상단 중앙으로 이동
+        const monitor = await currentMonitor();
+        if (monitor) {
+          const scaleFactor = monitor.scaleFactor;
+          const monitorSize = monitor.size;
+          const monitorPosition = monitor.position;
+
+          const physicalWidth = MODAL_WINDOW_SIZE.width * scaleFactor;
+
+          const x =
+            monitorPosition.x +
+            Math.round((monitorSize.width - physicalWidth) / 2);
+          const y = monitorPosition.y + 50;
+
+          await appWindow.setPosition(new PhysicalPosition(x, y));
+        }
+      } catch {
         // 웹 환경에서는 무시
         console.log("Not in Tauri environment");
       }
@@ -65,23 +94,32 @@ export function TimerSettingsModal({
 
     expandWindow();
 
-    // 닫힐 때 원래 크기로 복원
+    // 닫힐 때 원래 크기 및 위치로 복원
     return () => {
       const restoreWindow = async () => {
-        if (originalSizeRef.current) {
+        if (originalSizeRef.current && originalPositionRef.current) {
           try {
-            const { getCurrentWindow, LogicalSize } = await import(
-              "@tauri-apps/api/window"
-            );
+            const { getCurrentWindow, PhysicalSize, PhysicalPosition } =
+              await import("@tauri-apps/api/window");
             const appWindow = getCurrentWindow();
+
+            // 크기 복원 (저장된 크기는 PhysicalSize이므로 PhysicalSize 사용)
             await appWindow.setSize(
-              new LogicalSize(
+              new PhysicalSize(
                 originalSizeRef.current.width,
                 originalSizeRef.current.height
               )
             );
-          } catch (error) {
-            console.log("Failed to restore window size");
+
+            // 위치 복원 (저장된 위치는 PhysicalPosition)
+            await appWindow.setPosition(
+              new PhysicalPosition(
+                originalPositionRef.current.x,
+                originalPositionRef.current.y
+              )
+            );
+          } catch {
+            console.log("Failed to restore window size/position");
           }
         }
       };
@@ -102,7 +140,7 @@ export function TimerSettingsModal({
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#1A1A1A] overflow-auto">
+    <div className="fixed inset-0 z-50 flex flex-col bg-[#1A1A1A] overflow-hidden rounded-2xl border border-white/10">
       {/* 헤더 */}
       <div className="flex items-center justify-between p-4 border-b border-white/10">
         <h3 className="text-white text-sm font-semibold">

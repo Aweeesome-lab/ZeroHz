@@ -419,6 +419,7 @@ function FloatingBarContent() {
           stats={stats}
           onClose={() => setShowSessionHistory(false)}
           onClear={clearSessions}
+          isPro={pro.isPro}
         />
       )}
 

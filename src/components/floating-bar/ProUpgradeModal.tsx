@@ -16,7 +16,6 @@ const PURCHASE_URL =
   "https://zerohz-app.lemonsqueezy.com/buy/7f3f5f67-5a6c-4bec-8bb1-919aa1d735f3"; // LemonSqueezy Checkout
 const MODAL_WINDOW_WIDTH = 700;
 const MODAL_WINDOW_HEIGHT = 500;
-const DEFAULT_WINDOW_HEIGHT = 100;
 
 export function ProUpgradeModal({
   reason,
@@ -26,29 +25,48 @@ export function ProUpgradeModal({
 }: ProUpgradeModalProps) {
   const { t } = useTranslation();
 
-  // 모달 열릴 때 윈도우 크기 확장, 닫힐 때 복원
+  // 모달 열릴 때 윈도우 크기 확장 및 중앙 배치
   useEffect(() => {
-    let originalWidth: number | null = null;
-    let originalX: number | null = null;
+    let originalSize: { width: number; height: number } | null = null;
+    let originalPosition: { x: number; y: number } | null = null;
 
     const resizeWindow = async () => {
       try {
-        const { getCurrentWindow, PhysicalSize, PhysicalPosition } =
-          await import("@tauri-apps/api/window");
+        const {
+          getCurrentWindow,
+          LogicalSize,
+          PhysicalPosition,
+          currentMonitor,
+        } = await import("@tauri-apps/api/window");
         const window = getCurrentWindow();
+
+        // 현재 크기 및 위치 저장
         const size = await window.outerSize();
         const position = await window.outerPosition();
-        originalWidth = size.width;
-        originalX = position.x;
+        originalSize = { width: size.width, height: size.height };
+        originalPosition = { x: position.x, y: position.y };
 
-        // 새 너비로 중앙 정렬 계산
-        const widthDiff = MODAL_WINDOW_WIDTH - size.width;
-        const newX = position.x - Math.floor(widthDiff / 2);
-
+        // 모달 크기로 변경 (LogicalSize 사용)
         await window.setSize(
-          new PhysicalSize(MODAL_WINDOW_WIDTH, MODAL_WINDOW_HEIGHT)
+          new LogicalSize(MODAL_WINDOW_WIDTH, MODAL_WINDOW_HEIGHT)
         );
-        await window.setPosition(new PhysicalPosition(newX, position.y));
+
+        // 화면 상단 중앙으로 이동
+        const monitor = await currentMonitor();
+        if (monitor) {
+          const scaleFactor = monitor.scaleFactor;
+          const monitorSize = monitor.size;
+          const monitorPosition = monitor.position;
+
+          const physicalWidth = MODAL_WINDOW_WIDTH * scaleFactor;
+
+          const x =
+            monitorPosition.x +
+            Math.round((monitorSize.width - physicalWidth) / 2);
+          const y = monitorPosition.y + 50;
+
+          await window.setPosition(new PhysicalPosition(x, y));
+        }
       } catch {
         // 웹 환경에서는 무시
       }
@@ -58,23 +76,22 @@ export function ProUpgradeModal({
 
     return () => {
       const restoreWindow = async () => {
-        try {
-          const { getCurrentWindow, PhysicalSize, PhysicalPosition } =
-            await import("@tauri-apps/api/window");
-          const window = getCurrentWindow();
-          const position = await window.outerPosition();
+        if (originalSize && originalPosition) {
+          try {
+            const { getCurrentWindow, PhysicalSize, PhysicalPosition } =
+              await import("@tauri-apps/api/window");
+            const window = getCurrentWindow();
 
-          const restoreWidth = originalWidth ?? MODAL_WINDOW_WIDTH;
-          // 원래 위치로 복원
-          const widthDiff = MODAL_WINDOW_WIDTH - restoreWidth;
-          const newX = originalX ?? position.x + Math.floor(widthDiff / 2);
-
-          await window.setSize(
-            new PhysicalSize(restoreWidth, DEFAULT_WINDOW_HEIGHT)
-          );
-          await window.setPosition(new PhysicalPosition(newX, position.y));
-        } catch {
-          // 웹 환경에서는 무시
+            // 크기 및 위치 복원
+            await window.setSize(
+              new PhysicalSize(originalSize.width, originalSize.height)
+            );
+            await window.setPosition(
+              new PhysicalPosition(originalPosition.x, originalPosition.y)
+            );
+          } catch {
+            // 웹 환경에서는 무시
+          }
         }
       };
       restoreWindow();
