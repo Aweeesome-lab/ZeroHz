@@ -30,10 +30,25 @@
       "total": "총 세션",
       "completionRate": "완료율",
       "focusTime": "총 집중 시간",
-      "todayFocusTime": "오늘 집중 시간"
+      "todayFocusTime": "오늘 집중 시간",
+      "today": "오늘"
     },
     "chart": {
-      "week": "최근 7일"
+      "week": "최근 7일",
+      "activeHours": "활동 시간",
+      "less": "적음",
+      "more": "많음",
+      "total": "합계",
+      "all": "전체",
+      "days": {
+        "sun": "일",
+        "mon": "월",
+        "tue": "화",
+        "wed": "수",
+        "thu": "목",
+        "fri": "금",
+        "sat": "토"
+      }
     },
     "empty": "아직 세션이 없습니다",
     "date": {
@@ -116,6 +131,7 @@
     "invalidLicense": "유효하지 않은 라이센스 키입니다",
     "activated": "Pro 활성화됨",
     "haveLicense": "이미 라이센스 키가 있으신가요?",
-    "buyLicense": "라이센스 구매하기"
+    "buyLicense": "라이센스 구매하기",
+    "availableInPro": "Pro 이용 가능"
   }
 }
