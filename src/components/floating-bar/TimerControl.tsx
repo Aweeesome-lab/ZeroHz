@@ -6,6 +6,7 @@ import type { TimerMode, TimerPreset, SessionStats } from "@/types/timer";
 import { TimerSettingsModal } from "./TimerSettingsModal";
 import { SessionHistoryModal } from "./SessionHistoryModal";
 import type { TimerSession } from "@/types/timer";
+import { usePro } from "@/hooks";
 
 interface TimerControlProps {
   mode: TimerMode;
@@ -44,6 +45,7 @@ export function TimerControl({
   onClearSessions,
 }: TimerControlProps) {
   const { t } = useTranslation();
+  const pro = usePro();
   const [showSettings, setShowSettings] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
@@ -153,6 +155,7 @@ export function TimerControl({
           stats={stats}
           onClose={() => setShowHistory(false)}
           onClear={onClearSessions}
+          isPro={pro.isPro}
         />
       )}
     </div>
