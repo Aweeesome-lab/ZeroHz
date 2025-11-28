@@ -312,10 +312,10 @@ export default function Home() {
               version="v0.2.2"
               date="November 28, 2025"
               changes={[
-                "Added Usage Modal to track daily playtime and timer trial usage",
-                "Visual progress bars showing free tier limits",
-                "Auto-stop all sounds when daily limit is reached",
-                "Direct access to usage stats from tray menu",
+                "Added multilingual support (English, Korean)",
+                "Introduced Activity Heatmap to visualize focus trends",
+                "Enhanced usage tracking with daily limits and auto-stop",
+                "App usability improvements and bug fixes",
               ]}
             />
             <ReleaseItem
