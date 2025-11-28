@@ -177,59 +177,85 @@ export default function Home() {
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="py-24 border-t border-black/5">
+      <section id="pricing" className="py-32 border-t border-black/5">
         <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Pricing</h2>
-            <p className="text-black/60 max-w-xl mx-auto">
-              Start free, upgrade when you need more. One-time payment, lifetime
-              access.
+          <div className="text-center mb-20">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 font-serif">
+              Simple, transparent pricing.
+            </h2>
+            <p className="text-lg text-black/60 max-w-xl mx-auto">
+              No subscriptions, no hidden fees. Pay once and own it forever.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto items-start">
             {/* Free Plan */}
-            <div className="p-8 rounded-2xl bg-white border border-black/10 shadow-sm">
-              <div className="mb-6">
-                <h3 className="text-xl font-bold mb-2">Free</h3>
+            <div className="p-8 rounded-3xl bg-white border border-black/5 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="mb-8">
+                <h3 className="text-xl font-bold mb-2 text-black/80">Free</h3>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-4xl font-bold">$0</span>
-                  <span className="text-black/40">forever</span>
+                  <span className="text-5xl font-bold tracking-tight">$0</span>
+                  <span className="text-black/40 font-medium">/ forever</span>
                 </div>
+                <p className="text-black/40 text-sm mt-4 leading-relaxed">
+                  Perfect for trying out ZeroHz and experiencing the focus.
+                </p>
               </div>
 
               <Link
                 href="#hero"
-                className="w-full py-3 bg-gray-100 text-black rounded-full font-semibold hover:bg-gray-200 transition-all flex items-center justify-center gap-2 mb-8"
+                className="w-full py-4 bg-gray-50 text-black border border-black/5 rounded-xl font-bold hover:bg-gray-100 transition-all flex items-center justify-center gap-2 mb-8 group"
               >
-                <Download size={18} />
+                <Download
+                  size={18}
+                  className="group-hover:-translate-y-0.5 transition-transform"
+                />
                 Download Free
               </Link>
 
-              <ul className="space-y-3">
-                <PricingFeature>All ambient sounds</PricingFeature>
-                <PricingFeature>2 hours daily playtime</PricingFeature>
-                <PricingFeature>3 timer sessions trial</PricingFeature>
-                <PricingFeature>Menu bar integration</PricingFeature>
-              </ul>
+              <div className="space-y-4">
+                <p className="text-xs font-bold text-black/40 uppercase tracking-widest">
+                  What&apos;s included
+                </p>
+                <ul className="space-y-3">
+                  <PricingFeature>All 12 ambient sounds</PricingFeature>
+                  <PricingFeature>2 hours daily playtime</PricingFeature>
+                  <PricingFeature>3 timer sessions per day</PricingFeature>
+                  <PricingFeature>Menu bar integration</PricingFeature>
+                </ul>
+              </div>
             </div>
 
             {/* Pro Plan */}
-            <div className="p-8 rounded-2xl bg-[#111111] text-white border border-white/10 shadow-2xl relative overflow-hidden">
-              {/* Beta Discount Badge */}
-              <div className="absolute top-4 right-4 bg-amber-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                35% OFF
+            <div className="relative p-8 rounded-3xl bg-[#0A0A0A] text-white shadow-2xl shadow-amber-500/10 border border-white/10 overflow-hidden group">
+              {/* Glow Effect */}
+              <div className="absolute -top-20 -right-20 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl group-hover:bg-amber-500/30 transition-colors duration-500" />
+
+              {/* Badge */}
+              <div className="absolute top-6 right-6 bg-amber-500 text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg shadow-amber-500/20">
+                LIFETIME ACCESS
               </div>
-              <div className="mb-6">
-                <h3 className="text-xl font-bold mb-2">Pro</h3>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold">$9.99</span>
-                  <span className="text-white/40 line-through text-lg">
-                    $12.99
+
+              <div className="relative mb-8">
+                <h3 className="text-xl font-bold mb-2 text-amber-500">
+                  Pro License
+                </h3>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-5xl font-bold tracking-tight">
+                    $9.99
                   </span>
+                  <div className="flex flex-col items-start">
+                    <span className="text-white/40 line-through text-lg decoration-white/20">
+                      $12.99
+                    </span>
+                    <span className="text-amber-500/80 text-xs font-medium">
+                      One-time payment
+                    </span>
+                  </div>
                 </div>
-                <p className="text-amber-400 text-sm mt-1 font-medium">
-                  Beta discount
+                <p className="text-white/60 text-sm mt-4 leading-relaxed">
+                  Unlock the full potential of your focus. No recurring monthly
+                  costs.
                 </p>
               </div>
 
@@ -237,30 +263,40 @@ export default function Home() {
                 href={LEMONSQUEEZY_CHECKOUT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full py-3 bg-white text-black rounded-full font-bold hover:bg-gray-200 transition-all flex items-center justify-center gap-2 mb-8"
+                className="relative w-full py-4 bg-amber-500 text-black rounded-xl font-bold hover:bg-amber-400 transition-all flex items-center justify-center gap-2 mb-8 shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 hover:-translate-y-0.5"
               >
                 <Sparkles size={18} />
-                Get Pro License
+                Get Lifetime Access
               </Link>
 
-              <ul className="space-y-3">
-                <PricingFeature highlighted>All ambient sounds</PricingFeature>
-                <PricingFeature highlighted>Unlimited playtime</PricingFeature>
-                <PricingFeature highlighted>
-                  Unlimited timer sessions
-                </PricingFeature>
-                <PricingFeature highlighted>
-                  Session history & stats
-                </PricingFeature>
-                <PricingFeature highlighted>Priority support</PricingFeature>
-                <PricingFeature highlighted>Lifetime updates</PricingFeature>
-              </ul>
+              <div className="relative space-y-4">
+                <p className="text-xs font-bold text-white/40 uppercase tracking-widest">
+                  Everything in Free, plus
+                </p>
+                <ul className="space-y-3">
+                  <PricingFeature highlighted>
+                    Unlimited playtime
+                  </PricingFeature>
+                  <PricingFeature highlighted>
+                    Unlimited timer sessions
+                  </PricingFeature>
+                  <PricingFeature highlighted>
+                    Advanced session statistics
+                  </PricingFeature>
+                  <PricingFeature highlighted>Priority support</PricingFeature>
+                  <PricingFeature highlighted>
+                    Future updates included
+                  </PricingFeature>
+                </ul>
+              </div>
             </div>
           </div>
 
-          <p className="text-center text-black/40 text-sm mt-8">
-            Already have a license? Enter it in the app via tray menu → Activate
-            License
+          <p className="text-center text-black/40 text-sm mt-12">
+            Already have a license?{" "}
+            <span className="text-black/60 font-medium">
+              Activate via tray menu → Activate License
+            </span>
           </p>
         </div>
       </section>
