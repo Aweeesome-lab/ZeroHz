@@ -324,6 +324,13 @@ export default function Home() {
               <Mail size={18} />
               Contact via Threads
             </Link>
+            <Link
+              href="mailto:support@zerohz.app"
+              className="flex items-center gap-2 px-6 py-3 bg-white border border-black/10 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+            >
+              <Mail size={18} />
+              support@zerohz.app
+            </Link>
           </div>
         </div>
       </section>
