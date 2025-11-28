@@ -95,7 +95,7 @@ export default function Home() {
                 <p className="text-sm font-medium text-black/40 uppercase tracking-widest mb-2">
                   Interactive Demo
                 </p>
-                <p className="text-xl text-black/80 font-serif italic">
+                <p className="text-xl text-black/80 font-medium">
                   Turn up your volume and click to experience
                 </p>
               </div>
@@ -140,7 +140,7 @@ export default function Home() {
       >
         <div className="container mx-auto px-6">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 font-serif">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight">
               Everything you need to focus.
               <br />
               <span className="text-black/40">Nothing you don&apos;t.</span>
@@ -180,7 +180,7 @@ export default function Home() {
       <section id="pricing" className="py-32 border-t border-black/5">
         <div className="container mx-auto px-6">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-4xl font-bold mb-6 font-serif">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight">
               Simple, transparent pricing.
             </h2>
             <p className="text-lg text-black/60 max-w-xl mx-auto">
