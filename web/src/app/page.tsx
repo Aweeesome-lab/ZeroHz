@@ -188,9 +188,9 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto items-start">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {/* Free Plan */}
-            <div className="p-8 rounded-3xl bg-white border border-black/5 shadow-sm hover:shadow-md transition-all duration-300">
+            <div className="h-full flex flex-col p-8 rounded-3xl bg-white border border-black/5 shadow-sm hover:shadow-md transition-all duration-300">
               <div className="mb-8">
                 <h3 className="text-xl font-bold mb-2 text-black/80">Free</h3>
                 <div className="flex items-baseline gap-1">
@@ -213,7 +213,7 @@ export default function Home() {
                 Download Free
               </Link>
 
-              <div className="space-y-4">
+              <div className="mt-auto space-y-4">
                 <p className="text-xs font-bold text-black/40 uppercase tracking-widest">
                   What&apos;s included
                 </p>
@@ -227,7 +227,7 @@ export default function Home() {
             </div>
 
             {/* Pro Plan */}
-            <div className="relative p-8 rounded-3xl bg-[#0A0A0A] text-white shadow-2xl shadow-amber-500/10 border border-white/10 overflow-hidden group">
+            <div className="relative h-full flex flex-col p-8 rounded-3xl bg-[#0A0A0A] text-white shadow-2xl shadow-amber-500/10 border border-white/10 overflow-hidden group">
               {/* Glow Effect */}
               <div className="absolute -top-20 -right-20 w-64 h-64 bg-amber-500/20 rounded-full blur-3xl group-hover:bg-amber-500/30 transition-colors duration-500" />
 
@@ -269,7 +269,7 @@ export default function Home() {
                 Get Lifetime Access
               </Link>
 
-              <div className="relative space-y-4">
+              <div className="relative mt-auto space-y-4">
                 <p className="text-xs font-bold text-white/40 uppercase tracking-widest">
                   Everything in Free, plus
                 </p>
