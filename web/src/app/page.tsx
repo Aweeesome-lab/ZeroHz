@@ -266,39 +266,12 @@ export default function Home() {
               ]}
             />
             <ReleaseItem
-              version="v0.1.26"
-              date="November 26, 2025"
-              changes={["Stability improvements"]}
-            />
-            <ReleaseItem
-              version="v0.1.25"
-              date="November 26, 2025"
-              changes={["General improvements and bug fixes"]}
-            />
-            <ReleaseItem
-              version="v0.1.24"
-              date="November 26, 2025"
-              changes={["Added new sound: Glass Fruit"]}
-            />
-            <ReleaseItem
-              version="v0.1.16"
-              date="November 25, 2025"
-              changes={["Added 2 new sounds: Keyboard and Thunder"]}
-            />
-            <ReleaseItem
-              version="v0.1.15"
-              date="November 24, 2025"
+              version="v0.1.0 - v0.1.29"
+              date="November 23 - 26, 2025"
               changes={[
-                "Added 5 new sounds: Forest, Stream, Flight, Train, Night",
-              ]}
-            />
-            <ReleaseItem
-              version="v0.1.0"
-              date="November 23, 2025"
-              changes={[
-                "Initial release",
-                "Basic white noise player functionality",
-                "Included 4 ambient sounds: Rain, Wind, Waves, and Fire",
+                "Initial release with basic white noise player functionality",
+                "Added 12 ambient sounds: Rain, Wind, Waves, Fire, Forest, Stream, Flight, Train, Night, Keyboard, Thunder, Glass Fruit",
+                "Stability improvements and bug fixes",
               ]}
             />
           </div>
