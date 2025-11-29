@@ -61,5 +61,5 @@ export interface ProSettingsData {
 
 // 상수 (개발 모드에서는 짧은 값 사용)
 const IS_DEV = process.env.NODE_ENV === "development";
-export const FREE_DAILY_PLAYTIME_LIMIT = IS_DEV ? 60 : 2 * 60 * 60; // 개발: 60초, 프로덕션: 7200초 (2시간)
-export const FREE_TIMER_TRIAL_COUNT = IS_DEV ? 1 : 3; // 개발: 1회, 프로덕션: 3회
+export const FREE_DAILY_PLAYTIME_LIMIT = IS_DEV ? 1 * 60 * 60 : 3 * 60 * 60; // 개발: 1시간, 프로덕션: 3시간
+export const FREE_TIMER_TRIAL_COUNT = IS_DEV ? 5 : 5; // 개발: 5회, 프로덕션: 5회
