@@ -37,18 +37,22 @@ jobs:
         run: |
           npm install
           cd web && npm install
+
       - name: Create .env.local file for Next.js build
         shell: bash
         run: |
           # Create .env.local in the correct location (src/ for Next.js app)
           echo "NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}" > .env.local
           echo "NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}" >> .env.local
+
           # Verify the file was created correctly
           echo "Created .env.local with PostHog configuration:"
           cat .env.local | sed 's/=.*/=***/' # Show keys but hide values
+
           # Also export for Rust compilation (option_env! reads at compile time)
           echo "NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}" >> $GITHUB_ENV
           echo "NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}" >> $GITHUB_ENV
+
       - name: Verify PostHog secrets are set
         shell: bash
         env:
@@ -61,15 +65,18 @@ jobs:
           else
             echo "✓ NEXT_PUBLIC_POSTHOG_KEY is present (length: ${#POSTHOG_KEY})"
           fi
+
           if [ -z "$POSTHOG_HOST" ]; then
             echo "::warning::NEXT_PUBLIC_POSTHOG_HOST is empty, will use default"
           else
             echo "✓ NEXT_PUBLIC_POSTHOG_HOST is present: $POSTHOG_HOST"
           fi
+
       - name: Check Secrets
         shell: bash
         env:
           PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         run: |
           if [ -z "$PRIVATE_KEY" ]; then
             echo "::error::TAURI_PRIVATE_KEY is empty or missing!"
@@ -77,11 +84,19 @@ jobs:
           else
             echo "TAURI_PRIVATE_KEY is present (length: ${#PRIVATE_KEY})"
           fi
+          
+          if [ -z "$KEY_PASSWORD" ]; then
+            echo "::warning::TAURI_KEY_PASSWORD is empty or missing!"
+          else
+            echo "TAURI_KEY_PASSWORD is present"
+          fi
+
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
@@ -106,6 +121,7 @@ jobs:
           echo "Checking if PostHog key is embedded in the built JavaScript..."
           # Extract first 10 chars of key for safe searching (avoid exposing full key in logs)
           KEY_PREFIX="${POSTHOG_KEY:0:10}"
+
           # Search in the built output directory
           if grep -r "$KEY_PREFIX" out/ > /dev/null 2>&1; then
             echo "✓ PostHog key found in built output - analytics will work!"
@@ -115,6 +131,7 @@ jobs:
             echo "Check that .env.local was created before 'npm run build' was executed."
             exit 1
           fi
+
       - name: Debug - Check build output
         shell: bash
         run: |
@@ -125,6 +142,7 @@ jobs:
             echo "Windows build files:"
             find src-tauri/target/release/bundle -type f
           fi
+
       - name: Upload assets to Vercel Blob
         if: matrix.platform == 'macos-latest' || matrix.platform == 'windows-latest'
         shell: bash
@@ -139,6 +157,7 @@ jobs:
             ASSET_PATH=$(find src-tauri/target/release/bundle/nsis -name "*.exe" | head -n 1)
             SIG_PATH="${ASSET_PATH}.sig"
           fi
+
           if [ -n "$ASSET_PATH" ]; then
             echo "Found asset: $ASSET_PATH"
             
@@ -176,6 +195,7 @@ jobs:
             echo "No asset found to upload"
             exit 1
           fi
+
       - name: Upload Updater Data Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -194,6 +214,7 @@ jobs:
           else
             echo "WEBHOOK_URL secret not found, skipping notification."
           fi
+
   create-updater-json:
     needs: release
     runs-on: ubuntu-latest
@@ -244,6 +265,7 @@ jobs:
           # Usually tauri.conf.json has 0.1.18, tag is v0.1.18. 
           # The updater response version should match the app version.
           CLEAN_VERSION=${VERSION#v}
+
           # Create latest.json
           # Note: JSON content must be properly escaped if notes contain special chars.
           # Using jq to construct JSON is safer.
@@ -274,7 +296,9 @@ jobs:
             
           echo "Generated latest.json:"
           cat latest.json
+
           # Upload latest.json to Vercel Blob
           node web/scripts/upload-to-blob.mjs "latest.json"
+
           # Upload latest.json to GitHub Release
           gh release upload "${{ github.ref_name }}" latest.json --clobber --repo ${{ github.repository }}
