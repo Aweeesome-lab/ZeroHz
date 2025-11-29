@@ -70,7 +70,6 @@ jobs:
         shell: bash
         env:
           PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-          KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         run: |
           if [ -z "$PRIVATE_KEY" ]; then
             echo "::error::TAURI_PRIVATE_KEY is empty or missing!"
@@ -78,18 +77,11 @@ jobs:
           else
             echo "TAURI_PRIVATE_KEY is present (length: ${#PRIVATE_KEY})"
           fi
-          
-          if [ -z "$KEY_PASSWORD" ]; then
-            echo "::warning::TAURI_KEY_PASSWORD is empty or missing!"
-          else
-            echo "TAURI_KEY_PASSWORD is present"
-          fi
       - name: Build the app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
