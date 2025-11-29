@@ -338,8 +338,8 @@ function FloatingBarContent() {
     } else if (timer.isPaused) {
       timer.resume();
     } else {
-      // 타이머 시작 전 트라이얼 체크 (Free 사용자만)
-      if (!pro.isPro && !pro.canUseTimer()) {
+      // 타이머 시작 전 트라이얼 체크 (Free 사용자만, 카운트다운 모드일 때만)
+      if (timer.mode === "countdown" && !pro.isPro && !pro.canUseTimer()) {
         setUpgradeReason("timer");
         setShowUpgradeModal(true);
         return;
