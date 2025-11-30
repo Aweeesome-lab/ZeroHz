@@ -161,15 +161,15 @@ jobs:
           ZEROHZ_READ_WRITE_TOKEN: ${{ secrets.ZEROHZ_READ_WRITE_TOKEN }}
         run: |
           # Find the built asset based on platform
-          # For macOS: use .app.tar.gz (updater bundle), not .dmg (manual install)
-          # For Windows: use .nsis.zip (updater bundle)
+          # For macOS: use .app.tar.gz (updater bundle)
+          # For Windows: use .exe installer with .sig
           if [[ "${{ matrix.platform }}" == "macos-latest" ]]; then
             # Tauri v2 updater uses .app.tar.gz for macOS updates
             ASSET_PATH=$(find src-tauri/target/universal-apple-darwin/release/bundle/macos -name "*.app.tar.gz" | head -n 1)
             SIG_PATH="${ASSET_PATH}.sig"
           else
-            # Tauri v2 updater uses .nsis.zip for Windows updates
-            ASSET_PATH=$(find src-tauri/target/release/bundle/nsis -name "*.nsis.zip" | head -n 1)
+            # Tauri v2 updater uses .exe installer for Windows updates
+            ASSET_PATH=$(find src-tauri/target/release/bundle/nsis -name "*-setup.exe" | head -n 1)
             SIG_PATH="${ASSET_PATH}.sig"
           fi
 
