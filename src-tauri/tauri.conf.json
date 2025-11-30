@@ -1,7 +1,7 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "ZeroHz",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "identifier": "com.zerohz.app",
   "build": {
     "frontendDist": "../out",
@@ -25,7 +25,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: https://asset.localhost data:; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost https://*.posthog.com;",
+      "csp": "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' asset: https://asset.localhost data:; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost https://*.posthog.com https://github.com https://*.github.com https://*.githubusercontent.com https://*.vercel-storage.com;",
       "capabilities": [
         {
           "identifier": "main-capability",

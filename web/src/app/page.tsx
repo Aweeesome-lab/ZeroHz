@@ -309,7 +309,7 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
-              version="v0.2.6"
+              version="v0.2.7"
               date="November 30, 2025"
               changes={[
                 "Stability improvements",
