@@ -40,17 +40,29 @@ export default function TrayLanguageSync() {
     updateTrayLabels();
 
     // Listen for language changes from Tray
-    const unlisten = listen<string>("change-language", (event) => {
+    let unlistenFn: (() => void) | undefined;
+    let isMounted = true;
+
+    listen<string>("change-language", (event) => {
       const newLang = event.payload;
       if (newLang !== i18n.language) {
         i18n.changeLanguage(newLang);
       }
+    }).then((fn) => {
+      if (isMounted) {
+        unlistenFn = fn;
+      } else {
+        // Component unmounted before listener was set up
+        fn();
+      }
     });
 
     return () => {
-      unlisten.then((f) => f());
+      isMounted = false;
+      unlistenFn?.();
     };
-  }, [i18n]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Sync when language changes from within the app (e.g. if we add UI buttons later)
   useEffect(() => {

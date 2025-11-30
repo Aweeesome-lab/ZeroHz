@@ -139,19 +139,40 @@ function FloatingBarContent() {
     let unlistenSessionHistory: (() => void) | undefined;
     let unlistenLicenseInput: (() => void) | undefined;
     let unlistenUsage: (() => void) | undefined;
+    let isMounted = true;
 
     const setupListeners = async () => {
       try {
         const { listen } = await import("@tauri-apps/api/event");
-        unlistenSessionHistory = await listen("open-session-history", () => {
+
+        const sessionHistoryFn = await listen("open-session-history", () => {
           setShowSessionHistory(true);
         });
-        unlistenLicenseInput = await listen("open-license-input", () => {
+        if (isMounted) {
+          unlistenSessionHistory = sessionHistoryFn;
+        } else {
+          sessionHistoryFn();
+          return;
+        }
+
+        const licenseInputFn = await listen("open-license-input", () => {
           setShowLicenseModal(true);
         });
-        unlistenUsage = await listen("open-usage", () => {
+        if (isMounted) {
+          unlistenLicenseInput = licenseInputFn;
+        } else {
+          licenseInputFn();
+          return;
+        }
+
+        const usageFn = await listen("open-usage", () => {
           setShowUsageModal(true);
         });
+        if (isMounted) {
+          unlistenUsage = usageFn;
+        } else {
+          usageFn();
+        }
       } catch {
         // 웹 환경에서는 무시
       }
@@ -160,6 +181,7 @@ function FloatingBarContent() {
     setupListeners();
 
     return () => {
+      isMounted = false;
       unlistenSessionHistory?.();
       unlistenLicenseInput?.();
       unlistenUsage?.();
