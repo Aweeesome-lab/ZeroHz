@@ -150,49 +150,44 @@ jobs:
           ZEROHZ_READ_WRITE_TOKEN: ${{ secrets.ZEROHZ_READ_WRITE_TOKEN }}
         run: |
           # Find the built asset based on platform
+          # For macOS: use .app.tar.gz (updater bundle), not .dmg (manual install)
+          # For Windows: use .nsis.zip (updater bundle)
           if [[ "${{ matrix.platform }}" == "macos-latest" ]]; then
-            ASSET_PATH=$(find src-tauri/target/universal-apple-darwin/release/bundle/dmg -name "*.dmg" | head -n 1)
+            # Tauri v2 updater uses .app.tar.gz for macOS updates
+            ASSET_PATH=$(find src-tauri/target/universal-apple-darwin/release/bundle/macos -name "*.app.tar.gz" | head -n 1)
             SIG_PATH="${ASSET_PATH}.sig"
           else
-            ASSET_PATH=$(find src-tauri/target/release/bundle/nsis -name "*.exe" | head -n 1)
+            # Tauri v2 updater uses .nsis.zip for Windows updates
+            ASSET_PATH=$(find src-tauri/target/release/bundle/nsis -name "*.nsis.zip" | head -n 1)
             SIG_PATH="${ASSET_PATH}.sig"
           fi
 
-          if [ -n "$ASSET_PATH" ]; then
-            echo "Found asset: $ASSET_PATH"
-            
+          if [ -n "$ASSET_PATH" ] && [ -f "$ASSET_PATH" ]; then
+            echo "Found updater asset: $ASSET_PATH"
+
             # Upload asset to Vercel Blob
-            # This script writes the URL to blob-url.txt
             node web/scripts/upload-to-blob.mjs "$ASSET_PATH"
-            
+
             # Prepare data for next job
             mkdir -p updater_data
             cp blob-url.txt updater_data/url.txt
-            
+
             if [ -f "$SIG_PATH" ]; then
               echo "Found signature: $SIG_PATH"
-              cp "$SIG_PATH" updater_data/signature.txt
+              cat "$SIG_PATH" > updater_data/signature.txt
             else
-              echo "::warning::Signature file not found at $SIG_PATH"
-              echo "This may indicate an issue with the Tauri signing configuration."
-              echo "Listing directory contents for debugging:"
-              find src-tauri/target/release/bundle -maxdepth 3 2>/dev/null || true
-              
-              # Check if signing key was present during build
-              if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
-                echo "::error::TAURI_SIGNING_PRIVATE_KEY was not set during build"
-              else
-                echo "TAURI_SIGNING_PRIVATE_KEY was set (length check passed)"
-              fi
-              
-              # Create a placeholder signature to avoid downstream errors
-              # This is a temporary workaround - the real issue needs investigation
-              echo "SIGNATURE_MISSING_SEE_BUILD_LOGS" > updater_data/signature.txt
-              echo "::warning::Created placeholder signature. Update functionality may not work correctly."
+              echo "::error::Signature file not found at $SIG_PATH"
+              echo "Listing macos bundle directory:"
+              find src-tauri/target/universal-apple-darwin/release/bundle -type f 2>/dev/null || true
+              echo "Listing nsis bundle directory:"
+              find src-tauri/target/release/bundle/nsis -type f 2>/dev/null || true
+              exit 1
             fi
-            
           else
-            echo "No asset found to upload"
+            echo "::error::Updater asset not found!"
+            echo "Expected .app.tar.gz for macOS or .nsis.zip for Windows"
+            echo "Listing all bundle files:"
+            find src-tauri/target -name "*.tar.gz" -o -name "*.nsis.zip" 2>/dev/null || true
             exit 1
           fi
 
