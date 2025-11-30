@@ -309,6 +309,14 @@ export default function Home() {
           </h2>
           <div className="space-y-12">
             <ReleaseItem
+              version="v0.2.4"
+              date="November 30, 2025"
+              changes={[
+                "Fixed auto-start on login issue",
+                "Stability improvements",
+              ]}
+            />
+            <ReleaseItem
               version="v0.2.3"
               date="November 28, 2025"
               changes={[

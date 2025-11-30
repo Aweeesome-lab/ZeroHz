@@ -1,11 +1,15 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from "react";
 import type { ProSettingsData, UpgradeReason } from "@/types/pro";
-import {
-  FREE_DAILY_PLAYTIME_LIMIT,
-  FREE_TIMER_TRIAL_COUNT,
-} from "@/types/pro";
+import { FREE_DAILY_PLAYTIME_LIMIT, FREE_TIMER_TRIAL_COUNT } from "@/types/pro";
 import { validateLicense, activateLicense } from "@/lib/license";
 
 // 저장소 키
@@ -30,7 +34,9 @@ interface ProContextValue {
   timerTrialRemaining: number;
 
   // 액션
-  activateLicenseKey: (key: string) => Promise<{ success: boolean; error?: string }>;
+  activateLicenseKey: (
+    key: string
+  ) => Promise<{ success: boolean; error?: string }>;
   removeLicense: () => void;
 
   // 플레이타임 추적
@@ -73,25 +79,22 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
   );
 
   // 저장
-  const saveSettings = useCallback(
-    async (data: ProSettingsData) => {
-      try {
-        if (isTauri && storeRef.current) {
-          const store = storeRef.current as {
-            set: (key: string, value: unknown) => Promise<void>;
-            save: () => Promise<void>;
-          };
-          await store.set(STORE_KEY, data);
-          await store.save();
-        } else {
-          localStorage.setItem("zerohz_pro_settings", JSON.stringify(data));
-        }
-      } catch (error) {
-        console.error("Failed to save pro settings:", error);
+  const saveSettings = useCallback(async (data: ProSettingsData) => {
+    try {
+      if (isTauri && storeRef.current) {
+        const store = storeRef.current as {
+          set: (key: string, value: unknown) => Promise<void>;
+          save: () => Promise<void>;
+        };
+        await store.set(STORE_KEY, data);
+        await store.save();
+      } else {
+        localStorage.setItem("zerohz_pro_settings", JSON.stringify(data));
       }
-    },
-    []
-  );
+    } catch (error) {
+      console.error("Failed to save pro settings:", error);
+    }
+  }, []);
 
   // 초기 로드
   useEffect(() => {
@@ -101,7 +104,10 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
 
         if (isTauri) {
           const { load } = await import("@tauri-apps/plugin-store");
-          const store = await load(STORE_FILE, { autoSave: true, defaults: {} });
+          const store = await load(STORE_FILE, {
+            autoSave: true,
+            defaults: {},
+          });
           storeRef.current = store;
           saved = (await store.get<ProSettingsData>(STORE_KEY)) ?? null;
         } else {
@@ -111,15 +117,15 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
 
         if (saved) {
           setLicenseKey(saved.licenseKey);
-          setTimerTrialUsed(saved.timerTrialUsed);
-
           // 날짜 체크 - 다른 날이면 플레이타임 리셋
           const today = getTodayDate();
           if (saved.lastPlayDate === today) {
             setDailyPlaytimeUsed(saved.dailyPlaytimeUsed);
+            setTimerTrialUsed(saved.timerTrialUsed);
             setLastPlayDate(saved.lastPlayDate);
           } else {
             setDailyPlaytimeUsed(0);
+            setTimerTrialUsed(0);
             setLastPlayDate(today);
           }
 
@@ -151,6 +157,28 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
     loadSettings();
   }, [saveSettings]);
 
+  // 날짜 변경 체크 (1분마다)
+  useEffect(() => {
+    const checkDate = () => {
+      const today = getTodayDate();
+      if (lastPlayDate !== today) {
+        setDailyPlaytimeUsed(0);
+        setTimerTrialUsed(0);
+        setLastPlayDate(today);
+
+        saveSettings({
+          licenseKey,
+          dailyPlaytimeUsed: 0,
+          lastPlayDate: today,
+          timerTrialUsed: 0,
+        });
+      }
+    };
+
+    const interval = setInterval(checkDate, 60 * 1000);
+    return () => clearInterval(interval);
+  }, [lastPlayDate, licenseKey, saveSettings]);
+
   // 라이센스 활성화
   const activateLicenseKey = useCallback(
     async (key: string): Promise<{ success: boolean; error?: string }> => {
@@ -178,6 +206,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
           };
         }
       } catch (error) {
+        console.error("License validation error:", error);
         setIsValidating(false);
         return {
           success: false,
@@ -208,11 +237,15 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
       const today = getTodayDate();
       let newUsed = dailyPlaytimeUsed;
       let newDate = lastPlayDate;
+      let currentTimerTrialUsed = timerTrialUsed;
 
       if (lastPlayDate !== today) {
         newUsed = 0;
         newDate = today;
         setLastPlayDate(today);
+
+        currentTimerTrialUsed = 0;
+        setTimerTrialUsed(0);
       }
 
       newUsed = Math.min(newUsed + seconds, FREE_DAILY_PLAYTIME_LIMIT);
@@ -222,29 +255,58 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
         licenseKey,
         dailyPlaytimeUsed: newUsed,
         lastPlayDate: newDate,
-        timerTrialUsed,
+        timerTrialUsed: currentTimerTrialUsed,
       });
     },
-    [isPro, dailyPlaytimeUsed, lastPlayDate, licenseKey, timerTrialUsed, saveSettings]
+    [
+      isPro,
+      dailyPlaytimeUsed,
+      lastPlayDate,
+      licenseKey,
+      timerTrialUsed,
+      saveSettings,
+    ]
   );
 
   // 타이머 트라이얼 사용
   const useTimerTrial = useCallback((): boolean => {
     if (isPro) return true;
-    if (timerTrialUsed >= FREE_TIMER_TRIAL_COUNT) return false;
 
-    const newUsed = timerTrialUsed + 1;
+    const today = getTodayDate();
+    let currentTimerTrialUsed = timerTrialUsed;
+    let currentDailyPlaytimeUsed = dailyPlaytimeUsed;
+
+    // 날짜가 바뀌었으면 리셋
+    if (lastPlayDate !== today) {
+      currentTimerTrialUsed = 0;
+      currentDailyPlaytimeUsed = 0;
+
+      setTimerTrialUsed(0);
+      setDailyPlaytimeUsed(0);
+      setLastPlayDate(today);
+    }
+
+    if (currentTimerTrialUsed >= FREE_TIMER_TRIAL_COUNT) return false;
+
+    const newUsed = currentTimerTrialUsed + 1;
     setTimerTrialUsed(newUsed);
 
     saveSettings({
       licenseKey,
-      dailyPlaytimeUsed,
-      lastPlayDate,
+      dailyPlaytimeUsed: currentDailyPlaytimeUsed,
+      lastPlayDate: today,
       timerTrialUsed: newUsed,
     });
 
     return true;
-  }, [isPro, timerTrialUsed, licenseKey, dailyPlaytimeUsed, lastPlayDate, saveSettings]);
+  }, [
+    isPro,
+    timerTrialUsed,
+    licenseKey,
+    dailyPlaytimeUsed,
+    lastPlayDate,
+    saveSettings,
+  ]);
 
   // 재생 가능 여부
   const canPlay = useCallback((): boolean => {
