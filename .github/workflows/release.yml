@@ -108,7 +108,13 @@ jobs:
         with:
           tagName: ${{ github.ref_name }}
           releaseName: "v__VERSION__"
-          releaseBody: "See the assets to download this version and install."
+          releaseBody: |
+            ## 변경 사항
+
+            - 안정성 개선
+            - 자동 시작(Start at Login) 기능 수정
+            - 이벤트 리스너 안정성 개선
+            - 업데이터 호환성 개선
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || '' }}
