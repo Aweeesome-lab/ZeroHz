@@ -154,13 +154,33 @@ jobs:
             find src-tauri/target/release/bundle -type f
           fi
 
-      - name: Upload assets to Vercel Blob
+      - name: Upload installer to Vercel Blob (for landing page downloads)
         if: matrix.platform == 'macos-latest' || matrix.platform == 'windows-latest'
         shell: bash
         env:
           ZEROHZ_READ_WRITE_TOKEN: ${{ secrets.ZEROHZ_READ_WRITE_TOKEN }}
         run: |
-          # Find the built asset based on platform
+          # Upload DMG/EXE for direct downloads from landing page
+          if [[ "${{ matrix.platform }}" == "macos-latest" ]]; then
+            INSTALLER_PATH=$(find src-tauri/target/universal-apple-darwin/release/bundle/dmg -name "*.dmg" | head -n 1)
+          else
+            INSTALLER_PATH=$(find src-tauri/target/release/bundle/nsis -name "*-setup.exe" | head -n 1)
+          fi
+
+          if [ -n "$INSTALLER_PATH" ] && [ -f "$INSTALLER_PATH" ]; then
+            echo "Uploading installer: $INSTALLER_PATH"
+            node web/scripts/upload-to-blob.mjs "$INSTALLER_PATH"
+          else
+            echo "::warning::Installer not found, skipping upload"
+          fi
+
+      - name: Upload updater bundle to Vercel Blob
+        if: matrix.platform == 'macos-latest' || matrix.platform == 'windows-latest'
+        shell: bash
+        env:
+          ZEROHZ_READ_WRITE_TOKEN: ${{ secrets.ZEROHZ_READ_WRITE_TOKEN }}
+        run: |
+          # Find the updater bundle based on platform
           # For macOS: use .app.tar.gz (updater bundle)
           # For Windows: use .exe installer with .sig
           if [[ "${{ matrix.platform }}" == "macos-latest" ]]; then
@@ -196,9 +216,9 @@ jobs:
             fi
           else
             echo "::error::Updater asset not found!"
-            echo "Expected .app.tar.gz for macOS or .nsis.zip for Windows"
+            echo "Expected .app.tar.gz for macOS or .exe for Windows"
             echo "Listing all bundle files:"
-            find src-tauri/target -name "*.tar.gz" -o -name "*.nsis.zip" 2>/dev/null || true
+            find src-tauri/target -name "*.tar.gz" -o -name "*-setup.exe" 2>/dev/null || true
             exit 1
           fi
 
